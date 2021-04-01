@@ -6,11 +6,11 @@ import {BrowserWindow} from 'electron';
 class MainWindow extends BrowserWindow {
   constructor(url) {
     super({
-      height: 500,
-      width: 300,
-      frame: false,
+      height: 800,
+      width: 1000,
+      //frame: false,
       resizable: false,
-      show: false,
+      //show: false,
       webPreferences: { 
         backgroundThrottling: false,
         nodeIntegration: true,
@@ -19,7 +19,7 @@ class MainWindow extends BrowserWindow {
     });
 
     this.loadURL(url);
-    this.on('blur', this.onBlur.bind(this));
+    //this.on('blur', this.onBlur.bind(this));
   }
 
   onBlur() {

@@ -1,10 +1,6 @@
 <template>
   <q-page class="flex flex-center">
-    <q-media-player
-      type="audio"
-      :sources="sources">
-
-    </q-media-player>
+    
   </q-page>
 </template>
 
@@ -29,7 +25,9 @@ export default {
           src: convertSong('C:/Temp/test.mp3'),
           type: 'audio/mp3'
         }
-      ]
+      ],
+      stations: [],
+      queue: []
     }
   },
   methods: {

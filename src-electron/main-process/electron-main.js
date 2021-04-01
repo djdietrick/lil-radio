@@ -1,5 +1,6 @@
 import { app, BrowserWindow, nativeTheme } from 'electron'
-import db from '../db';
+// import db from '../db';
+import '../sql/server';
 import MainWindow from './main-window';
 import MainTray from './tray';
 import path from 'path';
@@ -28,7 +29,7 @@ function createWindow () {
   //app.dock.hide();
   mainWindow = new MainWindow(process.env.APP_URL);
 
-  tray = new MainTray(path.join(__dirname, '../icons/icon.ico'), mainWindow);
+  //tray = new MainTray(path.join(__dirname, '../icons/icon.ico'), mainWindow);
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -50,5 +51,5 @@ app.on('activate', () => {
   }
 })
 
-import {sweep} from '../db/dbUtils';
-sweep();
+// import {sweep} from '../db/dbUtils';
+// sweep();
