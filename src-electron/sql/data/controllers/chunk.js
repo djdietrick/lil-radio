@@ -1,4 +1,3 @@
-import { reject } from "core-js/fn/promise";
 import { Chunk } from "../models/chunk"
 
 export const getChunk = (ctx, id) => {

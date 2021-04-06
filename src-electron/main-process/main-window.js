@@ -4,7 +4,7 @@
 import {BrowserWindow} from 'electron';
 
 class MainWindow extends BrowserWindow {
-  constructor(url) {
+  constructor(url, devtools = false) {
     super({
       height: 800,
       width: 1000,
@@ -19,6 +19,8 @@ class MainWindow extends BrowserWindow {
     });
 
     this.loadURL(url);
+    if(devtools)
+      this.webContents.openDevTools();
     //this.on('blur', this.onBlur.bind(this));
   }
 

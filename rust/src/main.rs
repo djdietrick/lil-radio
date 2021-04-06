@@ -2,8 +2,11 @@ mod db;
 mod sweep;
 mod models;
 use std::env;
+use env_logger;
 
 fn main() -> Result<(), ()> {
+    env_logger::init();
+
     let args: Vec<String> = env::args().collect();
 
     assert!(args.len() == 3, "Invalid args!");

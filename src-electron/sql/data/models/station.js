@@ -1,6 +1,6 @@
 import {getChunksForStation} from '../controllers/chunk';
 
-export class Station {
+export default class Station {
     constructor({id, name}) {
         this.id = id;
         this.name = name;

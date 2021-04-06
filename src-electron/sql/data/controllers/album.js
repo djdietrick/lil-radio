@@ -20,6 +20,19 @@ export const getAlbum = (ctx, {id, title}) => {
     })
 }
 
+export const getAlbumById = (ctx, id) => {
+    return new Promise((resolve, reject) => {
+        ctx.db.get(`SELECT * FROM album WHERE id=${id};`)
+            .then(result => {
+                if(result) {
+                    resolve(new Album(result));
+                } else {
+                    result(null);
+                }
+            })
+    })
+}
+
 export const getAlbumByArtist = (ctx, title, artistId) => {
     return new Promise((resolve, reject) => {
         ctx.db.get(`SELECT * FROM album WHERE title="${title}" AND artistId=${artistId}`)

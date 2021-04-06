@@ -1,12 +1,19 @@
 <template>
-  <q-page class="flex flex-center">
-    
+  <q-page class="flex flex-center main-page">
+    <div class="main-page--left">
+
+    </div>
+    <div class="main-page--right">
+
+    </div>
   </q-page>
 </template>
 
 <script>
 import dataurl from 'dataurl';
 import fs from 'fs';
+import axios from 'axios';
+import {mapActions} from 'vuex';
 
 function convertSong(path) {
   const data = fs.readFileSync(path);
@@ -20,18 +27,25 @@ export default {
   name: 'PageIndex',
   data() {
     return {
-      sources: [
-        {
-          src: convertSong('C:/Temp/test.mp3'),
-          type: 'audio/mp3'
-        }
-      ],
-      stations: [],
-      queue: []
+      stations: []
     }
   },
   methods: {
-    
+    ...mapActions(['fetchStations'])
+  },
+  created() {
+    try {
+      this.fetchStations();
+    } catch(e) {
+      console.log(e);
+    }
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  .main-page {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+  }
+</style>

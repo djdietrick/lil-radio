@@ -47,25 +47,25 @@ fn find_size_rec(dir: String, dir_sizes: &mut HashMap<String, u64>, start_dir: &
 fn update_dir(db: &Connection, path: String, dir_sizes: &HashMap<String, u64>) -> Result<(), Box<Error>> {
     if let Some(mut data) = Data::query_by_path(db, &path) {
         if data.datatype == DataType::DIR && data.size != *dir_sizes.get(&path).unwrap() as u32 {
-            data.update_size(db, *dir_sizes.get(&path).unwrap() as u32);
-            for entry in read_dir(path).unwrap() {
+            for entry in read_dir(&path).unwrap() {
                 let child = entry.unwrap().path().to_slash().unwrap();
                 update_dir(db, child, dir_sizes).unwrap();
             }
+            data.update_size(db, *dir_sizes.get(&path).unwrap() as u32);
         }
     } else {
         let mut data: Data = Data::build_from_path(&path);
         if data.datatype == DataType::DIR {
             data.size = *dir_sizes.get(&path).unwrap() as u32;
-            data.create_or_update(db);
             trace!("Created dir: {}", path);
             for entry in read_dir(path).unwrap() {
                 let child = entry.unwrap().path().to_slash().unwrap();
                 update_dir(db, child, dir_sizes).unwrap();
             }
-        } else {
             data.create_or_update(db);
+        } else {
             trace!("Creating song: {}", path);
+            data.create_or_update(db);
             if let Some(song) = Song::build_from_path(db, path) {
                 create_song_data(db, song.id, data.id);
             }

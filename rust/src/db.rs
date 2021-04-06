@@ -87,6 +87,24 @@ fn migrate_database(conn: &Connection) -> Result<(), Error> {
         conn.execute("INSERT INTO datatype (id, value) VALUES (?1, ?2);", 
             params![1, "FILE"])?;
     }
+
+    conn.execute("CREATE TABLE IF NOT EXISTS station (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL UNIQUE);", NO_PARAMS)?;
+
+    conn.execute("CREATE TABLE IF NOT EXISTS chunk (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        stationId INTEGER NOT NULL,
+        FOREIGN KEY(stationId) REFERENCES station(id) ON DELETE CASCADE
+    );", NO_PARAMS)?;
+
+    conn.execute("CREATE TABLE IF NOT EXISTS chunk_song (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        chunkId INTEGER NOT NULL,
+        songId INTEGER NOT NULL,
+        FOREIGN KEY(chunkId) REFERENCES chunk(id) ON DELETE CASCADE,
+        FOREIGN KEY(songId) REFERENCES song(id) ON DELETE CASCADE
+    );", NO_PARAMS)?;
     
     Ok(())
 }

@@ -39,3 +39,17 @@ export const updateStation = (ctx, station) => {
             .catch(e => reject(e));
     })
 }
+
+export const deleteStation = (ctx, id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            await ctx.db.run(`DELETE FROM chunk_song WHERE chunkId IN (SELECT id FROM chunk WHERE stationId=${id})`);
+            await ctx.db.run(`DELETE FROM chunk WHERE stationId=${id}`);
+            await ctx.db.run(`DELETE FROM station WHERE id=${id}`);
+            resolve(id);
+        } catch(e) {
+            reject(e);
+        }
+        
+    })
+}

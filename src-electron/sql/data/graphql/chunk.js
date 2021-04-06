@@ -17,7 +17,7 @@ export const ChunkQueries = {
         args: {
             id: {type: graphql.GraphQLID}
         },
-        resolve: (root, id, context, info) => {
+        resolve: (root, {id}, context, info) => {
             return getChunk(context, id);
         }
     },
@@ -26,7 +26,7 @@ export const ChunkQueries = {
         args: {
             stationId: {type: graphql.GraphQLID}
         },
-        resolve: (root, stationId, context, info) => {
+        resolve: (root, {stationId}, context, info) => {
             return getChunksForStation(context, stationId);
         }
     }

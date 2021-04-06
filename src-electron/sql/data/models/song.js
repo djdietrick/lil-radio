@@ -1,5 +1,5 @@
 import {getArtist, insertArtist} from '../controllers/artist';
-import {getAlbum, insertAlbum, getAlbumByArtist} from '../controllers/album';
+import {getAlbumById, insertAlbum, getAlbumByArtist} from '../controllers/album';
 import {getPathFromSongId} from '../controllers/data';
 
 import * as mm from 'music-metadata';
@@ -20,7 +20,7 @@ export default class Song {
     }
 
     album(obj, ctx) {
-        return getAlbum(ctx, {id: this.albumId});
+        return getAlbumById(ctx, this.albumId);
     }
 
     path(obj, ctx) {

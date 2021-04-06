@@ -1,6 +1,6 @@
 import { app, BrowserWindow, nativeTheme } from 'electron'
 // import db from '../db';
-import '../sql/server';
+import server from '../sql/server';
 import MainWindow from './main-window';
 import MainTray from './tray';
 import path from 'path';
@@ -20,18 +20,24 @@ if (process.env.PROD) {
 }
 
 let mainWindow;
+let graqhqlWindow;
 let tray;
 
-function createWindow () {
+async function createWindow () {
   /**
    * Initial window options
    */
   //app.dock.hide();
-  mainWindow = new MainWindow(process.env.APP_URL);
+
+  await server();
+
+  mainWindow = new MainWindow(process.env.APP_URL, true);
+  graqhqlWindow = new MainWindow("http://localhost:5000");
 
   //tray = new MainTray(path.join(__dirname, '../icons/icon.ico'), mainWindow);
 
-  mainWindow.on('closed', () => {
+  //mainWindow.on('closed', () => {
+  graqhqlWindow.on('closed', () => {
     mainWindow = null;
     tray = null;
   })

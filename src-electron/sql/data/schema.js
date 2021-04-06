@@ -3,6 +3,8 @@ import {ArtistQueries, ArtistMutations} from './graphql/artist';
 import {AlbumQueries, AlbumMutations} from './graphql/album';
 import {SongQueries, SongMutations} from './graphql/song';
 import {DataQueries} from './graphql/data';
+import {StationQueries, StationMutations} from './graphql/station';
+import {ChunkQueries} from './graphql/chunk';
 
 const queryType = new graphql.GraphQLObjectType({
     name: 'Query',
@@ -10,7 +12,9 @@ const queryType = new graphql.GraphQLObjectType({
        ...ArtistQueries,
        ...AlbumQueries,
        ...SongQueries,
-       ...DataQueries
+       ...DataQueries,
+       ...StationQueries,
+       ...ChunkQueries
     }
 })
 
@@ -19,7 +23,8 @@ const mutationType = new graphql.GraphQLObjectType({
     fields: {
         ...ArtistMutations,
         ...AlbumMutations,
-        ...SongMutations
+        ...SongMutations,
+        ...StationMutations
     }
 })
 

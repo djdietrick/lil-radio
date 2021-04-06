@@ -15,7 +15,12 @@ export const getArtist = (ctx, {id, name}) => {
         let a = id && name;
         ctx.db.get(`SELECT * FROM artist WHERE ${id ? 'id=' + id : ''} 
             ${a ? ' AND ' : ''}${name ? 'name="' + name + '"' : ''};`)
-            .then(result => result ? console.log(result) && resolve(new Artist(result)) : resolve(null))
+            .then(result => {
+                if(result) {
+                    resolve(new Artist(result));
+                } else {
+                    resolve(null);
+                }})
             .catch(err => reject(err))
     })
 }

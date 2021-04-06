@@ -1,12 +1,12 @@
-import db from './index.js';
+import db from '../db/index.js';
 import fs from 'fs';
 import path, { join } from 'path';
 
-import Song from './models/song';
-import {Data, DataType} from './models/data';
+import Song from '../db/models/song';
+import {Data, DataType} from '../db/models/data';
 
-import {getData, createOrUpdateData} from './controllers/data';
-import {createOrUpdateSong} from './controllers/songs';
+import {getData, createOrUpdateData} from '../db/controllers/data';
+import {createOrUpdateSong} from '../db/controllers/songs';
 
 export async function getChunk(path) {
     return await db.findOne({_id: path});
