@@ -43,7 +43,10 @@ async function createWindow () {
   })
 }
 
-app.on('ready', createWindow)
+app.on('ready', () => {
+  require('vue-devtools').install();
+  createWindow();
+})
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

@@ -24,7 +24,8 @@
     "nedb": "^1.8.0",
     "quasar": "^1.0.0",
     "sqlite": "^4.0.19",
-    "sqlite3": "^5.0.2"
+    "sqlite3": "^5.0.2",
+    "vue-devtools": "^5.1.4"
   },
   "devDependencies": {
     "@quasar/app": "^2.0.0",

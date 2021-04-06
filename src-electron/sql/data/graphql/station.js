@@ -43,9 +43,10 @@ export const StationMutations = {
     updateStation: {
         type: StationType,
         args: {
-            station: {type: StationType}
+            id: {type: graphql.GraphQLID},
+            name: {type: graphql.GraphQLString}
         },
-        resolve: (root, {station}, context, info) => {
+        resolve: (root, station, context, info) => {
             return updateStation(context, station);
         }
     },
