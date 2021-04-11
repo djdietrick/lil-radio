@@ -1,3 +1,6 @@
 {
-  "@quasar/qmediaplayer": {}
+  "@quasar/qmediaplayer": {},
+  "@quasar/apollo": {
+    "graphql_uri": "http://api.example.com"
+  }
 }
