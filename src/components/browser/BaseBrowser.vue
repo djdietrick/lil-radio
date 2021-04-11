@@ -9,13 +9,17 @@
             <q-input class="browser__header__search q-my-sm" v-model="search" clearable outlined></q-input>
         </div>
         <div class="browser__content">
-
+            <component :is="selected" :search='search'/>
         </div>
     </div>
 </template>
 
 <script>
+import ArtistBrowser from './ArtistBrowser.vue';
 export default {
+    components: {
+        'artists': ArtistBrowser
+    },
     data() {
         return {
             search: '',

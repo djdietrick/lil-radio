@@ -1,6 +1,7 @@
 import * as graphql from 'graphql';
 import {getAlbum, getAlbums, getAlbumsByArtist, insertAlbum} from '../controllers/album';
 import {ArtistType} from './artist';
+import {SongType} from './song';
 
 export const AlbumType = new graphql.GraphQLObjectType({
     name: 'Album',
@@ -8,7 +9,8 @@ export const AlbumType = new graphql.GraphQLObjectType({
         id: { type: graphql.GraphQLID },
         title: {type: graphql.GraphQLString },
         artistId: {type: graphql.GraphQLID},
-        artist: { type: ArtistType }
+        artist: { type: ArtistType },
+        songs: {type: graphql.GraphQLList(SongType)}
     })
 })
 

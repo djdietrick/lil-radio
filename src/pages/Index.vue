@@ -41,6 +41,7 @@ export default {
   },
   created() {
     try {
+      this.$q.dark.set(true);
       this.fetchStations();
     } catch(e) {
       console.log(e);

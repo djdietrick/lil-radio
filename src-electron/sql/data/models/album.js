@@ -13,6 +13,6 @@ export default class Album {
     }
 
     songs(obj, ctx) {
-        return getSongsInAlbum(ctx, {id: this.id});
+        return getSongsInAlbum(ctx, this.id);
     }
 }
