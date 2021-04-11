@@ -1,12 +1,13 @@
 <template>
-  <q-page class="flex flex-center main-page">
+  <!-- <q-page class="flex flex-center main-page">
     <div class="main-page--left">
 
     </div>
     <div class="main-page--right">
 
     </div>
-  </q-page>
+  </q-page> -->
+  <BaseBrowser />
 </template>
 
 <script>
@@ -14,6 +15,8 @@ import dataurl from 'dataurl';
 import fs from 'fs';
 import axios from 'axios';
 import {mapActions} from 'vuex';
+
+import BaseBrowser from '../components/browser/BaseBrowser.vue';
 
 function convertSong(path) {
   const data = fs.readFileSync(path);
@@ -25,6 +28,9 @@ function convertSong(path) {
 
 export default {
   name: 'PageIndex',
+  components: {
+    BaseBrowser
+  },
   data() {
     return {
       stations: []

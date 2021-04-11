@@ -7,7 +7,6 @@
 </template>
 
 <script>
-import EssentialLink from 'components/EssentialLink.vue'
 
 const linksData = [
   {
@@ -56,7 +55,6 @@ const linksData = [
 
 export default {
   name: 'MainLayout',
-  components: { EssentialLink },
   data () {
     return {
       leftDrawerOpen: false,
