@@ -6,8 +6,8 @@ import {BrowserWindow} from 'electron';
 class MainWindow extends BrowserWindow {
   constructor(url, devtools = false) {
     super({
-      height: 800,
-      width: 1000,
+      height: 1000,
+      width: 1400,
       //frame: false,
       resizable: false,
       //show: false,
