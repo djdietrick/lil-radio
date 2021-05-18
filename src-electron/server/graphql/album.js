@@ -1,5 +1,5 @@
 import * as graphql from 'graphql';
-import {getAlbum, getAlbums, getAlbumsByArtist, insertAlbum} from '../controllers/album';
+import {getAlbum, getAlbums, getAlbumsByArtist, insertAlbum, searchAlbum} from '../controllers/album';
 import {ArtistType} from './artist';
 import {SongType} from './song';
 
@@ -25,10 +25,10 @@ export const AlbumQueries = {
         type: AlbumType,
         args: {
             id: { type: graphql.GraphQLID },
-            name: { type: graphql.GraphQLString }
+            title: { type: graphql.GraphQLString }
         },
-        resolve: (root, {id, name}, context, info) => {
-            return getAlbum(context, {id, name})
+        resolve: (root, {id, title}, context, info) => {
+            return getAlbum(context, {id, title})
         }
     },
     AlbumsByArtist: {
@@ -38,6 +38,15 @@ export const AlbumQueries = {
         },
         resolve: (root, {artistId}, context, info) => {
             return getAlbumsByArtist(context, artistId);
+        }
+    },
+    SearchAlbum: {
+        type: graphql.GraphQLList(AlbumType),
+        args: {
+            title: { type: graphql.GraphQLString }
+        },
+        resolve: (root, {title}, context, info) => {
+            return searchAlbum(context, title);
         }
     }
 }

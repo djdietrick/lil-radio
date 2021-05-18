@@ -3,9 +3,9 @@ import {graphqlHTTP} from 'express-graphql';
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import path from 'path';
-import {schema, rootValue} from './data/schema';
+import {schema, rootValue} from './schema';
 import getPort from 'get-port';
-import {sweep} from './data/utils/sweep';
+import {sweep} from './utils/sweep';
 import {execFile} from 'child_process';
 
 const isDev = process.env.NODE_ENV === 'developement';
@@ -14,14 +14,14 @@ const isDev = process.env.NODE_ENV === 'developement';
 
 export default async () => {
     sqlite.open({
-        filename: path.join(__dirname, 'db/test.db'),
+        filename: path.join(__dirname, '../sql/db/test.db'),
         driver: sqlite3.Database
     })
     .then(async db => {
         try {
             
             execFile(path.join(__dirname, '../../rust/target/release/lil-radio-rust.exe'),
-                [path.join(__dirname, 'db/test.db'), 'D:/Dropbox/Music/Artists'],
+                [path.join(__dirname, '../sql/db/test.db'), 'D:/Dropbox/Music/Artists'],
                 (err, stdout, stderr) => {
                     console.log(stdout);
                     if(err) {

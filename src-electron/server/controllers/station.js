@@ -12,9 +12,9 @@ export const getStation = (ctx, {id, name}) => {
     return new Promise((resolve, reject) => {
         if(!id && !name) reject('Provide a parameter');
         let a = id && name;
-        ctx.db.all(`SELECT * FROM station WHERE ${id ? 'id=' + id : ''} 
+        ctx.db.get(`SELECT * FROM station WHERE ${id ? 'id=' + id : ''} 
             ${a ? ' AND ' : ''}${name ? 'name="' + name + '"' : ''};`)
-            .then(result => resolve(result.map(r => new Station(r))))
+            .then(result => resolve(new Station(result)))
             .catch(err => reject(err))
     })
 }

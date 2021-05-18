@@ -1,4 +1,4 @@
-import { deleteStation } from 'app/src-electron/sql/data/controllers/station';
+import { deleteStation } from 'app/src-electron/server/controllers/station';
 import axios from 'axios';
 
 const state = {

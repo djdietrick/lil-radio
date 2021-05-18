@@ -1,8 +1,10 @@
-import { app, BrowserWindow, nativeTheme } from 'electron'
+import { app, nativeTheme, ipcMain } from 'electron'
 // import db from '../db';
-import server from '../sql/server';
-import MainWindow from './main-window';
-import MainTray from './tray';
+import server from '../server';
+import MainWindow from './windows/main-window';
+import MainTray from './windows/tray';
+import TrayWindow from './windows/tray-window';
+import StationWindow from './windows/station-window';
 import path from 'path';
 
 try {
@@ -19,33 +21,42 @@ if (process.env.PROD) {
   global.__statics = __dirname
 }
 
-let mainWindow;
+let mainWindow = null;
+let stationWindow = null;
 let graqhqlWindow;
 let tray;
+let trayWindow;
 
-async function createWindow () {
-  /**
-   * Initial window options
-   */
-  //app.dock.hide();
+function createBrowserWindow () {
+  if(mainWindow === null) {
+    mainWindow = new MainWindow(process.env.APP_URL, true);
+    mainWindow.on('close', () => {
+      mainWindow = null;
+    })
+  }
+  mainWindow.focus();
+}
 
-  await server();
-
-  mainWindow = new MainWindow(process.env.APP_URL, true);
-  graqhqlWindow = new MainWindow("http://localhost:5000");
-
-  //tray = new MainTray(path.join(__dirname, '../icons/icon.ico'), mainWindow);
-
-  //mainWindow.on('closed', () => {
-  graqhqlWindow.on('closed', () => {
-    mainWindow = null;
-    tray = null;
+function createStationWindow(id) {
+  stationWindow = new StationWindow(process.env.APP_URL + '/#/station/' + id, true);
+  stationWindow.on('close', () => {
+    stationWindow = null;
   })
+}
+
+async function start() {
+  await server();
+  //graqhqlWindow = new MainWindow("http://localhost:5000");
+
+  trayWindow = new TrayWindow(process.env.APP_URL + '/#/tray');
+  tray = new MainTray(path.join(__dirname, '../icons/icon.ico'), trayWindow);
+
+  //createBrowserWindow();
 }
 
 app.on('ready', () => {
   require('vue-devtools').install();
-  createWindow();
+  start();
 })
 
 app.on('window-all-closed', () => {
@@ -56,9 +67,14 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (mainWindow === null) {
-    createWindow()
+    createBrowserWindow()
   }
 })
 
-// import {sweep} from '../db/dbUtils';
-// sweep();
+ipcMain.on('openBrowser', () => {
+  createBrowserWindow()
+});
+
+ipcMain.on('editStation', (event, arg) => {
+  createStationWindow(arg);
+});

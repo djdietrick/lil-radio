@@ -37,3 +37,11 @@ export const insertArtist = (ctx, name) => {
         }
     })
 }
+
+export const searchArtist = (ctx, name) => {
+    return new Promise((resolve, reject) => {
+        ctx.db.all(`SELECT * FROM artist WHERE name LIKE '%${name}%'`)
+            .then(result => resolve(result.map(r => new Artist(r))))
+            .catch(err => reject(err));
+    })
+}

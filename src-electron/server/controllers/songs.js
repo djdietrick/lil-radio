@@ -77,3 +77,11 @@ export const getSongsInChunk = (ctx, chunkId) => {
             .catch(err => reject(err));
     });
 }
+
+export const searchSongs = (ctx, title) => {
+    return new Promise((resolve, reject) => {
+        ctx.db.all(`SELECT * FROM song WHERE title LIKE '%${title}%'`)
+            .then(result => resolve(result.map(r => new Song(r))))
+            .catch(err => reject(err));
+    })
+}

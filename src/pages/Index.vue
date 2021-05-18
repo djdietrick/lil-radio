@@ -1,30 +1,11 @@
 <template>
-  <!-- <q-page class="flex flex-center main-page">
-    <div class="main-page--left">
-
-    </div>
-    <div class="main-page--right">
-
-    </div>
-  </q-page> -->
   <BaseBrowser />
 </template>
 
 <script>
-import dataurl from 'dataurl';
-import fs from 'fs';
-import axios from 'axios';
 import {mapActions} from 'vuex';
 
 import BaseBrowser from '../components/browser/BaseBrowser.vue';
-
-function convertSong(path) {
-  const data = fs.readFileSync(path);
-  return dataurl.convert({
-    data,
-    mimetype: 'audio/mp3'
-  });
-}
 
 export default {
   name: 'PageIndex',
@@ -41,7 +22,7 @@ export default {
   },
   created() {
     try {
-      this.$q.dark.set(true);
+      //this.$q.dark.set(true);
       this.fetchStations();
     } catch(e) {
       console.log(e);

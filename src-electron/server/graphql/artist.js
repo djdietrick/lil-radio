@@ -1,5 +1,5 @@
 import * as graphql from 'graphql';
-import {getArtist, getArtists, insertArtist} from '../controllers/artist';
+import {getArtist, getArtists, insertArtist, searchArtist} from '../controllers/artist';
 import {AlbumType} from './album';
 import {SongType} from './song';
 
@@ -28,6 +28,15 @@ export const ArtistQueries = {
         },
         resolve: (root, args, context, info) => {
             return getArtist(context, args);
+        }
+    },
+    SearchArtist: {
+        type: graphql.GraphQLList(ArtistType),
+        args: {
+            name: {type: graphql.GraphQLString}
+        },
+        resolve: (root, {name}, context, info) => {
+            return searchArtist(context, name);
         }
     }
 }

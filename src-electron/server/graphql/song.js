@@ -1,7 +1,7 @@
 import * as graphql from "graphql";
 import {AlbumType} from './album';
 import {ArtistType} from './artist';
-import {getSongs, getSong, getSongsByArtist, getSongsInAlbum} from '../controllers/songs';
+import {getSongs, getSong, getSongsByArtist, getSongsInAlbum, searchSongs} from '../controllers/songs';
 
 export const SongType = new graphql.GraphQLObjectType({
     name: 'Song',
@@ -50,6 +50,15 @@ export const SongQueries = {
         },
         resolve: (root, {albumId}, context, info) => {
             return getSongsInAlbum(context, artistId);
+        }
+    },
+    SearchSongs: {
+        type: graphql.GraphQLList(SongType),
+        args: {
+            title: {type: graphql.GraphQLString}
+        },
+        resolve: (root, {title}, context, info) => {
+            return searchSongs(context, title);
         }
     }
 }

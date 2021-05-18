@@ -32,7 +32,7 @@ class MainTray extends Tray {
         width
       });
       this.mainWindow.show();
-      this.mainWindow.webContents.openDevTools();
+      //this.mainWindow.webContents.openDevTools();
     }
   }
 

@@ -3,11 +3,11 @@
 
 import {BrowserWindow} from 'electron';
 
-class MainWindow extends BrowserWindow {
+class StationWindow extends BrowserWindow {
   constructor(url, devtools = false) {
     super({
-      height: 1000,
-      width: 1400,
+      height: 600,
+      width: 800,
       //frame: false,
       resizable: false,
       //show: false,
@@ -24,9 +24,6 @@ class MainWindow extends BrowserWindow {
     //this.on('blur', this.onBlur.bind(this));
   }
 
-  onBlur() {
-    this.hide();
-  }
 }
 
-export default MainWindow;
+export default StationWindow;

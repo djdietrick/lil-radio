@@ -13,9 +13,9 @@ export const getAlbum = (ctx, {id, title}) => {
     return new Promise((resolve, reject) => {
         if(!id && !title) reject('Provide a parameter');
         let a = id && title;
-        ctx.db.all(`SELECT * FROM album WHERE ${id ? 'id=' + id : ''} 
+        ctx.db.get(`SELECT * FROM album WHERE ${id ? 'id=' + id : ''} 
             ${a ? ' AND ' : ''}${title ? 'title="' + title + '"' : ''};`)
-            .then(result => resolve(result.map(r => new Album(r))))
+            .then(result => result ? resolve(new Album(result)) : resolve(null))
             .catch(err => reject(err))
     })
 }
@@ -59,5 +59,13 @@ export const insertAlbum = (ctx, title, artistId) => {
             reject(e);
         }
         
+    })
+}
+
+export const searchAlbum = (ctx, title) => {
+    return new Promise((resolve, reject) => {
+        ctx.db.all(`SELECT * FROM album WHERE title LIKE '%${title}%'`)
+            .then(result => resolve(result.map(r => new Album(r))))
+            .catch(err => reject(err));
     })
 }
