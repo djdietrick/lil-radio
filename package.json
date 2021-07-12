@@ -8,12 +8,14 @@
   "scripts": {
     "lint": "eslint --ext .js,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
-    "dev": "quasar dev -m electron"
+    "dev": "quasar dev -m electron",
+    "build:rust": "cd rust && cargo build --release"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
     "axios": "^0.21.1",
     "core-js": "^3.9.1",
+    "cors": "^2.8.5",
     "dataurl": "^0.1.0",
     "express": "^4.17.1",
     "express-graphql": "^0.12.0",

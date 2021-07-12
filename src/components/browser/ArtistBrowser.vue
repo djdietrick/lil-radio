@@ -11,23 +11,22 @@
         <div class="artists__info">
             <div class="artists__info__albums" v-if="Artist">
                 <div class="artists__info__albums__item" v-for="album in Artist.albums" :key="album.id"
-                    @click="selectedAlbum = album.id" :class="{ 'selected': selectedAlbum == album.id }">
+                    @mousedown="selectedAlbum = album.id" :class="{ 'selected': selectedAlbum == album.id }"
+                    @dragstart="dragAlbum(album.id, $event)" draggable="true">
                     {{album.title}}
                 </div>
             </div>
             <div class="artists__info__songs" v-if="Album">
                 <h5>{{Album.title}}</h5>
                 <div class="artists__info__songs__list" ref="songlist" id="songlist">
-                <!-- <draggable :list="songList" group="songs" @change="log" selectedClass="selected" multiDrag> -->
                     <div v-for="(song, i) in songList" :key="song.id" class="artists__info__songs__list__item"
-                        :class="{'artists__info__songs__list__item--seperator': needSeperator(i), 'selected': isSelected(i)}"
-                        @click="toggleSelect(i)" draggable="true" @dragstart="drag(i, $event)">
+                        :class="{'artists__info__songs__list__item--seperator': needSeperator(i), 'selected': isSelected(song.id)}"
+                        @click="onClick(song)" draggable="true" @dragstart="drag(song.id, $event)">
                         <span class="track">{{song.track}}</span> 
                         <span class="title">{{song.title}}</span>
                         <span class="duration">{{formatTime(song.duration)}}</span>
                         <span class="id">{{song.id}}</span> 
                     </div>
-                <!-- </draggable> -->
                 </div>
             </div>
         </div>
@@ -35,8 +34,8 @@
         <div class="station">
             <div class="station__header">Add to Station</div>
             <div class="station__add" ref="stationlist">
-                <div class="station__entry" v-for="station in Stations" :key="station.id" @drop="drop($event)" 
-                    @dragover.prevent @dragenter.prevent>
+                <div class="station__entry" v-for="station in Stations" :key="station.id" @drop="drop($event, station)" 
+                    @dragover.prevent="dragover($event)" @dragenter.prevent @dragleave="dragleave($event)">
                     {{station.name}}
                 </div>
             </div>
@@ -49,30 +48,22 @@
 <script>
 import gql from 'graphql-tag';
 import moment from 'moment';
-import {Sortable, MultiDrag} from 'sortablejs';
-import draggable from 'vuedraggable';
-
-Sortable.mount(new MultiDrag());
-
+import DoubleClickHandler from '../../mixins/DoubleClickHandler'
+import {mapActions} from 'vuex';
 export default {
-    props: {
-        search: String
-    },
-    components: {
-        draggable
-    },
     data() {
         return {
             selectedArtist: null,
             selectedAlbum: null,
-            songSortable: null,
-            stationSortable: null,
             songList: [],
-            isMounted: false,
-            selected: []
+            selected: [],
+            shift: false,
+            ctrl: false,
+            selectedPivot: null
         }
     },
     methods: {
+        ...mapActions(['setQueue', 'selectSong']),
         formatTime(seconds) {
             let m = moment.duration(seconds, 'seconds');
             return `${m.minutes()}:${m.seconds() < 10 ? '0' : ''}${m.seconds()}`
@@ -80,31 +71,101 @@ export default {
         needSeperator(i) {
             return i > 0 && this.Album && this.Album.songs[i].disk != this.Album.songs[i-1].disk
         },
-        drag(i, e) {
-            if(this.selected.length == 0) {
-                this.selected.push(this.songList[i])
+        drag(id, e) {
+            if(this.selected.length == 0 || (this.selected.length == 1 && this.selected[0] != id)) {
+                this.selected = [id]
             }
             e.dataTransfer.dropEffect = "move";
             e.dataTransfer.effectAllowed = "move";
-            e.dataTransfer.setData("songs", this.selected);
-            console.log("dragging!");
         },
-        drop(e) {
-            e.preventDefault();
-            let songs = e.dataTransfer.getData("songs");
-            console.log(songs);
+        dragAlbum(id, e) {
+            e.dataTransfer.dropEffect = "move";
+            e.dataTransfer.effectAllowed = "move";
             this.selected = [];
-        },
-        toggleSelect(i) {
-            let ind = this.selected.indexOf(i);
-            if (ind > -1) {
-                this.selected.splice(ind, 1);
-            } else {
-                this.selected.push(i);
+            for(let song of this.Album.songs) {
+                this.selected.push(song.id);
             }
         },
-        isSelected(i) {
-            return this.selected.includes(i);
+        drop(e, station) {
+            e.preventDefault();
+            let songs = this.selected.map(i => parseInt(i));
+            console.log(this.songs);
+            this.$apollo.mutate({
+                mutation: gql`mutation ($stationId: ID!, $songs: [ID]!) {
+                    addSongsToStation(stationId: $stationId, songs: $songs)
+                }`,
+                variables: {
+                    stationId: parseInt(station.id),
+                    songs
+                }
+            }).then(() => {
+                this.$q.notify({
+                    message: `Added ${this.selected.length} song${this.selected.length > 1 ? 's' : ''} to ${station.name}`,
+                    type: 'positive',
+                    timeout: 1000
+                })
+            }).catch(err => {
+                console.error(err);
+                this.$q.notify({
+                    message: err,
+                    type: 'negative'
+                })
+            })
+            e.target.classList.remove("draghover")
+        },
+        dragover(e) {
+            e.target.classList.add("draghover")
+        },
+        dragleave(e) {
+            e.target.classList.remove("draghover")
+        },
+        getIndexInSongList(id) {
+            for(let i = 0; i < this.songList.length; i++) {
+                if(this.songList[i].id == id) return i;
+            }
+            return -1;
+        },
+        onSingleClick(song) {
+            this.toggleSelect(song.id);
+        },
+        onDoubleClick(song) {
+            this.setQueue(this.songList);
+            let index = -1;
+            for(let i = 0; i < this.songList.length; i++) {
+                if(this.songList[i].id === song.id) {
+                    index = i;
+                    break;
+                }
+            }
+            this.selectSong(index);
+        },
+        toggleSelect(id) {
+            if(this.shift) {
+                if(this.selected.length == 0) {
+                    this.selected = [id];
+                    this.selectedPivot = id;
+                } else {
+                    let pivotInd = this.getIndexInSongList(this.selectedPivot);
+                    let clickInd = this.getIndexInSongList(id);
+                    let start = pivotInd < clickInd ? pivotInd : clickInd;
+                    let end =  pivotInd < clickInd ? clickInd : pivotInd;
+                    this.selected = [];
+                    for(let i = start; i <= end; i++) {
+                        this.selected.push(this.songList[i].id);
+                    }
+                }
+            } else if(this.ctrl) {
+                if(this.selected.indexOf(id) < 0) {
+                    this.selected.push(id);
+                    this.selectedPivot = id;
+                }
+            } else {
+                this.selected = [id];
+                this.selectedPivot = id;
+            }
+        },
+        isSelected(id) {
+            return this.selected.includes(id);
         }
     },
     watch: {
@@ -114,45 +175,7 @@ export default {
         Album: function(album) {
             if (album && album.songs) this.songList = album.songs;
             else this.songList = [];
-        }
-    },
-    updated() {
-        this.$nextTick(() => {
-            if(this.$refs.songlist) {
-                // this.songSortable = Sortable.create(this.$refs.songlist, {
-                //     group: {
-                //         name: 'songs',
-                //         pull: 'clone',
-                //         put: false
-                //     },
-                //     sort: false,
-                //     multiDrag: true,
-                //     selectedClass: "selected",
-                //     multiDragKey: 'CTRL'
-                // });
-            } else {
-                this.songSortable = null;
-            }
-        })
-    },
-    mounted() {
-        // this.stationSortable = Sortable.create(this.$refs.stationlist, {
-        //     group: {
-        //         name: 'songs',
-        //         pull: false,
-        //         put: true
-        //     },
-        //     onAdd: function(e) {
-        //         for(let item of e.items) {
-        //             item.classList.remove('selected');
-        //         }
-        //     },
-        //     onSort: (e) => {
-        //         //console.log(this.$refs.stationlist.children);
-        //         this.getSongList();
-        //     }
-        // })
-        this.isMounted = true;
+        },
     },
     apollo: {
         Artists: gql`query {
@@ -198,7 +221,13 @@ export default {
                                 path,
                                 track,
                                 disk,
-                                duration
+                                duration,
+                                artist {
+                                    name
+                                },
+                                album {
+                                    title
+                                }
                             }
                         }
                     }`;
@@ -216,7 +245,26 @@ export default {
                 name
             }    
         }`
-    }
+    },
+    created() {
+        window.addEventListener('keydown', (e) => {
+            if(e.key == "Shift") {
+                this.shift = true;
+            } else if(e.key == "Control") {
+                this.ctrl = true;
+            }
+        })
+        window.addEventListener('keyup', (e) => {
+            if(e.key == "Shift") {
+                this.shift = false;
+            } else if(e.key == "Control") {
+                this.ctrl = false;
+            }
+        })
+    },
+    mixins: [
+        DoubleClickHandler
+    ]
 }
 </script>
 
@@ -225,7 +273,7 @@ export default {
     &__browser {
         display: grid;
         grid-template-columns: 15rem 1fr 20rem;        
-        height: 92vh;
+        height: 85vh;
     }
 
     &__list {
@@ -233,7 +281,7 @@ export default {
         flex-direction: column;
         border-right: 1px solid rgba(0,0,0,0.2);
         overflow-y: auto;
-        height: 92.5vh;
+        height: 85vh;
         box-shadow: 3px 0 0 rgba(0,0,0,0.2);
         
         &__item {
@@ -262,7 +310,7 @@ export default {
             flex-direction: column;
             overflow-y: auto;
             border-right: 1px solid rgba(0,0,0,0.2);
-            height: 92.5vh;
+            height: 85vh;
 
             &__item {
                 padding: 1rem;
@@ -283,7 +331,7 @@ export default {
         &__songs {
             padding: 1rem 1rem;
             overflow-y: auto;
-            height: 92vh;
+            height: 85vh;
 
             &__list {
                 display: flex;
@@ -347,16 +395,23 @@ export default {
     &__add {
         padding: 1rem;
         background-color: $grey-2;
-        box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+        //box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
     }
 
     &__entry {
         width: 100%;
-        background-color: red;
+        background-color: $grey-4;
+        border-radius: 0.5rem;
         height: 3rem;
         display: grid;
         place-items: center;
+        transition: 0.2s ease-in-out;
     }
+}
+
+.draghover {
+    background-color: rgba($primary, 0.6);
+    transform: scale(1.02);
 }
 
 .selected__icon {

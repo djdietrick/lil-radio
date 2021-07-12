@@ -1,5 +1,5 @@
 import * as graphql from 'graphql';
-import {getChunk, getChunksForStation} from '../controllers/chunk';
+import {getChunk, getChunksForStation, createOrUpdateChunk, deleteChunk} from '../controllers/chunk';
 import {SongType} from './song';
 
 export const ChunkType = new graphql.GraphQLObjectType({
@@ -28,6 +28,29 @@ export const ChunkQueries = {
         },
         resolve: (root, {stationId}, context, info) => {
             return getChunksForStation(context, stationId);
+        }
+    }
+}
+
+export const ChunkMutations = {
+    CreateOrUpdateChunk: {
+        type: ChunkType,
+        args: {
+            id: {type: graphql.GraphQLID},
+            stationId: {type: graphql.GraphQLNonNull(graphql.GraphQLID)},
+            songs: {type: graphql.GraphQLNonNull(graphql.GraphQLList(graphql.GraphQLID))}
+        },
+        resolve: (root, args, context, info) => {
+            return createOrUpdateChunk(context, args);
+        }
+    },
+    DeleteChunk: {
+        type: graphql.GraphQLBoolean,
+        args: {
+            id: {type: graphql.GraphQLNonNull(graphql.GraphQLID)}
+        },
+        resolve: (root, {id}, context, info) => {
+            return deleteChunk(context, id);
         }
     }
 }

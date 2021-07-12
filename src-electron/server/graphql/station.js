@@ -1,13 +1,13 @@
 import * as graphql from 'graphql';
-import {ChunkType} from './chunk';
-import { getStation, getStations, insertStation, updateStation, deleteStation } from '../controllers/station';
+import {SongType} from './song';
+import { getStation, getStations, insertStation, updateStation, deleteStation, insertSongsIntoStation, removeSongFromStation } from '../controllers/station';
 
 export const StationType = new graphql.GraphQLObjectType({
     name: 'Station',
     fields: () => ({
         id: {type: graphql.GraphQLID},
         name: {type: graphql.GraphQLString},
-        chunks: {type: graphql.GraphQLList(ChunkType)}
+        songs: {type: graphql.GraphQLList(SongType)}
     })
 })
 
@@ -57,6 +57,26 @@ export const StationMutations = {
         },
         resolve: (root, {id}, context, info) => {
             return deleteStation(context, id);
+        }
+    },
+    addSongsToStation: {
+        type: graphql.GraphQLList(graphql.GraphQLID),
+        args: {
+            songs: {type: graphql.GraphQLNonNull(graphql.GraphQLList(graphql.GraphQLID))},
+            stationId: {type: graphql.GraphQLNonNull(graphql.GraphQLID)}
+        },
+        resolve: (root, args, context, info) => {
+            return insertSongsIntoStation(context, args);
+        }
+    },
+    deleteSongFromStation: {
+        type: graphql.GraphQLID,
+        args: {
+            songId: {type: graphql.GraphQLNonNull(graphql.GraphQLID)},
+            stationId: {type: graphql.GraphQLNonNull(graphql.GraphQLID)}
+        },
+        resolve: (root, args, context, info) => {
+            return removeSongFromStation(context, args);
         }
     }
 }

@@ -20,6 +20,14 @@ export const getSong = (ctx, {id, title}) => {
     })
 }
 
+export const getSongById = (ctx, id) => {
+    return new Promise((resolve, reject) => {
+        ctx.db.get(`SELECT * FROM song WHERE id=${id}`)
+            .then(result => resolve(new Song(result)))
+            .catch(err => reject(err));
+    })
+}
+
 export const getSongsByArtist = (ctx, id) => {
     return new Promise((resolve, reject) => {
         ctx.db.all(`SELECT * FROM song WHERE artistId=${id};`)
@@ -73,7 +81,7 @@ export const insertSong = ({db}, song) => {
 export const getSongsInChunk = (ctx, chunkId) => {
     return new Promise((resolve, reject) => {
         ctx.db.all(`SELECT songId FROM chunk_song WHERE chunkId=${chunkId}`)
-            .then(result => resolve(Promise.all(result.map(r => getSong({id: r.songId})))))
+            .then(result => resolve(Promise.all(result.map(r => getSongById(ctx, r.songId)))))
             .catch(err => reject(err));
     });
 }

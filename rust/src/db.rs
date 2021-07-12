@@ -92,18 +92,28 @@ fn migrate_database(conn: &Connection) -> Result<(), Error> {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE);", NO_PARAMS)?;
 
-    conn.execute("CREATE TABLE IF NOT EXISTS chunk (
+    // conn.execute("CREATE TABLE IF NOT EXISTS chunk (
+    //     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    //     stationId INTEGER NOT NULL,
+    //     FOREIGN KEY(stationId) REFERENCES station(id) ON DELETE CASCADE
+    // );", NO_PARAMS)?;
+
+    // conn.execute("CREATE TABLE IF NOT EXISTS chunk_song (
+    //     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    //     chunkId INTEGER NOT NULL,
+    //     songId INTEGER NOT NULL,
+    //     ind INTEGER NOT NULL,
+    //     FOREIGN KEY(chunkId) REFERENCES chunk(id) ON DELETE CASCADE,
+    //     FOREIGN KEY(songId) REFERENCES song(id) ON DELETE CASCADE
+    // );", NO_PARAMS)?;
+
+    conn.execute("CREATE TABLE IF NOT EXISTS station_song (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         stationId INTEGER NOT NULL,
-        FOREIGN KEY(stationId) REFERENCES station(id) ON DELETE CASCADE
-    );", NO_PARAMS)?;
-
-    conn.execute("CREATE TABLE IF NOT EXISTS chunk_song (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        chunkId INTEGER NOT NULL,
         songId INTEGER NOT NULL,
-        FOREIGN KEY(chunkId) REFERENCES chunk(id) ON DELETE CASCADE,
-        FOREIGN KEY(songId) REFERENCES song(id) ON DELETE CASCADE
+        FOREIGN KEY(stationId) REFERENCES station(id) ON DELETE CASCADE,
+        FOREIGN KEY(songId) REFERENCES song(id) ON DELETE CASCADE,
+        UNIQUE(stationId, songId)
     );", NO_PARAMS)?;
     
     Ok(())

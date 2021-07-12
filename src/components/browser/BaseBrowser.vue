@@ -1,6 +1,6 @@
 <template>
 
-    <q-layout view="hHh LpR fff">
+    <q-layout view="hHh LpR fFf">
 
         <q-header bordered class="bg-primary text-white" height-hint="98">
             <q-toolbar>
@@ -22,16 +22,22 @@
             </q-page>
         </q-page-container>
 
+        <q-footer elevated class="bg-white text-primary">
+            <base-audio></base-audio>
+        </q-footer>
+
     </q-layout>
 </template>
 
 <script>
 import ArtistBrowser from './ArtistBrowser.vue';
 import SearchBrowser from './SearchBrowser.vue';
+import BaseAudio from '../audio/BaseAudio.vue';
 export default {
     components: {
         'artists': ArtistBrowser,
-        'search': SearchBrowser
+        'search': SearchBrowser,
+        'base-audio': BaseAudio
     },
     data() {
         return {

@@ -1,4 +1,4 @@
-import {getChunksForStation} from '../controllers/chunk';
+import {getSongsInStation} from '../controllers/station';
 
 export default class Station {
     constructor({id, name}) {
@@ -6,7 +6,7 @@ export default class Station {
         this.name = name;
     }
 
-    chunks(obj, ctx) {
-        return getChunksForStation(ctx, this.id);
+    songs(obj, ctx) {
+        return getSongsInStation(ctx, this.id);
     }
 }

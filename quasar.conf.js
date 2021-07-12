@@ -93,7 +93,7 @@ module.exports = function (/* ctx */) {
 
       // Quasar plugins
       plugins: [
-        'Dialog'
+        'Dialog', 'Notify', 'Loading'
       ]
     },
 
@@ -191,6 +191,10 @@ module.exports = function (/* ctx */) {
           __dirname: false
         }
       }
+    },
+
+    "@quasar/apollo": {
+      "graphql_uri": "http://localhost:5000/api"
     }
   }
 }

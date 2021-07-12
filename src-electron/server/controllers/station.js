@@ -1,4 +1,5 @@
 import Station from '../models/station';
+import { getSongById } from './songs';
 
 export const getStations = ctx => {
     return new Promise((resolve, reject) => {
@@ -51,5 +52,53 @@ export const deleteStation = (ctx, id) => {
             reject(e);
         }
         
+    })
+}
+
+export const getSongsInStation = (ctx, id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            ctx.db.all(`SELECT songId FROM station_song WHERE stationId=${id};`)
+                .then(result => resolve(result.map(r => getSongById(ctx, r.songId))))
+                .catch(err => reject(err));
+        } catch(e) {
+            reject(e);
+        }
+    })
+}
+
+export const insertSongsIntoStation = (ctx, {songs, stationId}) => {
+    let res = [];
+    for(let songId of songs) {
+        res.push(addSongToStation(ctx, {songId, stationId}))
+    }
+    return Promise.all(res);
+}
+
+export const addSongToStation = (ctx, {songId, stationId}) => {
+    return new Promise(async(resolve, reject) => {
+        try {
+            await ctx.db.run(`INSERT INTO station_song (songId, stationId) 
+                VALUES (${songId}, ${stationId})`);
+            resolve();
+        } catch(e) {
+            // Already in station
+            if(e.code === 'SQLITE_CONSTRAINT') {
+                resolve(-1);
+            } else {
+                reject(e);
+            }
+        }
+    })
+}
+
+export const removeSongFromStation = (ctx, {songId, stationId}) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const res = await ctx.db.run(`DELETE FROM station_song WHERE stationId=${stationId} AND songId=${songId};`);
+            resolve(res.lastID);
+        } catch(e) {
+            reject(e);
+        }
     })
 }

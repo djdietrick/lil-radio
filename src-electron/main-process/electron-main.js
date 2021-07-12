@@ -46,9 +46,9 @@ function createStationWindow(id) {
 
 async function start() {
   await server();
-  //graqhqlWindow = new MainWindow("http://localhost:5000");
+  graqhqlWindow = new MainWindow("http://localhost:5000/api", false);
 
-  trayWindow = new TrayWindow(process.env.APP_URL + '/#/tray');
+  trayWindow = new TrayWindow(process.env.APP_URL + '/#/tray', true);
   tray = new MainTray(path.join(__dirname, '../icons/icon.ico'), trayWindow);
 
   //createBrowserWindow();
@@ -78,3 +78,10 @@ ipcMain.on('openBrowser', () => {
 ipcMain.on('editStation', (event, arg) => {
   createStationWindow(arg);
 });
+
+ipcMain.on('closeStation', () => {
+  if(stationWindow) {
+    stationWindow.close();
+  }
+  stationWindow = null;
+})

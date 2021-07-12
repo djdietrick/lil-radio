@@ -38,6 +38,7 @@ export default {
                         name: data
                     }
                 })
+                this.$apollo.queries.Stations.refetch();
             })
         },
         openBrowser() {
@@ -54,6 +55,15 @@ export default {
                 name
             }
         }`
+    },
+    created() {
+        this.$q.electron.ipcRenderer.on('refreshStations', () => {
+            this.$apollo.queries.Stations.refetch();
+        })
+        this.$root.$on('refreshStations', () => {
+            console.log("Refresh");
+            this.$apollo.queries.Stations.refetch();
+        })
     }
 }
 </script>

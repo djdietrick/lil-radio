@@ -4,7 +4,7 @@ import {AlbumQueries, AlbumMutations} from './graphql/album';
 import {SongQueries, SongMutations} from './graphql/song';
 import {DataQueries} from './graphql/data';
 import {StationQueries, StationMutations} from './graphql/station';
-import {ChunkQueries} from './graphql/chunk';
+import {ChunkQueries, ChunkMutations} from './graphql/chunk';
 
 const queryType = new graphql.GraphQLObjectType({
     name: 'Query',
@@ -24,7 +24,8 @@ const mutationType = new graphql.GraphQLObjectType({
         ...ArtistMutations,
         ...AlbumMutations,
         ...SongMutations,
-        ...StationMutations
+        ...StationMutations,
+        ...ChunkMutations
     }
 })
 
