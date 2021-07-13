@@ -9,9 +9,27 @@
         <div class="station__content">
             
         </div> -->
-        <q-table class="station__table" dense :data="rows" :columns="columns" row-key="id" :title="Station.name"
+        <q-table class="station__table" dense :data="Station.songs" :columns="columns" :title="Station.name"
                 :rows-per-page-options="[0]" :pagination.sync="pagination" hide-bottom virtual-scroll
-                :virtual-scroll-item-size="48" :virtual-scroll-sticky-size-start="48"></q-table>
+                :virtual-scroll-item-size="48" :virtual-scroll-sticky-size-start="48"
+                :sort-method="customSort" selection="multiple" :selected.sync="selected">
+                
+                <template v-slot:header="props">
+                    <q-tr :props="props">
+                        <q-th v-for="col in props.cols" :key="col.name" :props="props">
+                            {{ col.label }}
+                        </q-th>
+                    </q-tr>
+                </template> 
+                <template v-slot:body="props">
+                    <q-tr class="cursor-pointer" :props="props" @click.native="props.selected = !props.selected">
+                        <q-td v-for="col in props.cols" :key="col.name" :props="props">
+                            {{ col.value }}
+                        </q-td>
+                    </q-tr>
+                </template>
+
+        </q-table>
     </div>
 </template>
 
@@ -71,41 +89,6 @@ export default {
             }
         }
     },
-    computed: {
-        rows() {
-            let ret = [];
-            if(this.Station) {
-                if(this.sortMode === 'artist') {
-                    let byArtist = {};
-                    for(let song of this.Station.songs) {
-                        if(!byArtist[song.artist.id]) byArtist[song.artist.id] = [];
-                        byArtist[song.artist.id].push(song);
-                    }
-                    for(let key of Object.keys(byArtist)) {
-                        byArtist[key].sort((l, r) => {
-                            if(l.album.id === r.album.id) {
-                                if(l.disk === r.disk) {
-                                    return l.track < r.track;
-                                } else {
-                                    return l.disk < r.disk;
-                                }
-                            } else {
-                                return l.album.title < r.album.title;
-                            }
-                        })
-                    }
-                    for(let key of Object.keys(byArtist)) {
-                        ret.push(...byArtist[key])
-                    }
-                } else if(this.sortMode === 'title') {
-
-                } else if(this.sortMode === 'album') {
-
-                }
-            }
-            return ret;
-        }
-    },
     watch: {
         Station: function(val) {
             if(!val) {
@@ -113,6 +96,9 @@ export default {
             } else {
                 this.$q.loading.hide();
             }
+        },
+        selected: function(val) {
+            console.log(val);
         }
     },
     methods: {
@@ -143,6 +129,51 @@ export default {
             let m = moment.duration(seconds, 'seconds');
             return `${m.minutes()}:${m.seconds() < 10 ? '0' : ''}${m.seconds()}`
         },
+        customSort(rows, sortBy, descending) {
+            console.log(sortBy);
+            let ret = [];
+            if(this.Station) {
+                if(this.sortMode === 'artist') {
+                    let byArtist = {};
+                    let artistIdToName = {};
+                    for(let song of this.Station.songs) {
+                        if(!byArtist[song.artist.id]) byArtist[song.artist.id] = [];
+                        byArtist[song.artist.id].push(song);
+                        artistIdToName[song.artist.id] = song.artist.name;
+                    }
+                    
+                    for(let key of Object.keys(byArtist)) {
+                        byArtist[key].sort((l, r) => {
+                            if(l.album.id === r.album.id) {
+                                if(l.disk === r.disk) {
+                                    return l.track - r.track;
+                                } else {
+                                    return l.disk - r.disk;
+                                }
+                            } else {
+                                return l.album.title < r.album.title;
+                            }
+                        })
+                    }
+                    let sortedIds = Object.keys(byArtist).sort((l, r) => {
+                        let lname = artistIdToName[l], rname = artistIdToName[r];
+                        if(lname < rname) return -1;
+                        else if (lname > rname) return 1;
+                        return 0;
+                    })
+                    console.log(byArtist);
+                    for(let id of sortedIds) {
+                        ret.push(...byArtist[id])
+                    }
+                } else if(this.sortMode === 'title') {
+
+                } else if(this.sortMode === 'album') {
+
+                }
+            }
+            console.log(ret);
+            return ret;
+        }
     },
     apollo: {
         Station: {

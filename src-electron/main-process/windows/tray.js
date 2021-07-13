@@ -1,11 +1,11 @@
 // const electron = require('electron');
 // const { Tray, app, Menu } = electron;
 
-import {Tray, app, Menu} from 'electron';
+import {Tray, app, Menu, nativeImage} from 'electron';
 
 class MainTray extends Tray {
   constructor(iconPath, mainWindow) {
-    super(iconPath);
+    super(nativeImage.createFromPath(iconPath));
 
     this.mainWindow = mainWindow;
 

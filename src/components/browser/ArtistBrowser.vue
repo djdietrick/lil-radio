@@ -1,7 +1,7 @@
 <template>
     <div class="artists__browser">
         <div class="artists__list">
-            <div class="artists__list__item" v-for="artist in Artists" :key="artist.id"
+            <div class="artists__list__item" v-for="artist in sortedArtists" :key="artist.id"
                 @click="selectedArtist = artist.id" :class="{ 'selected': selectedArtist == artist.id }">
                 <span>{{artist.name}}</span>
                 <span v-if="selectedArtist == artist.id" class="selected__icon"><q-icon name="chevron_right"></q-icon></span>
@@ -176,6 +176,19 @@ export default {
             if (album && album.songs) this.songList = album.songs;
             else this.songList = [];
         },
+    },
+    computed: {
+        sortedArtists() {
+            if(!this.Artists) return [];
+            let copy = [...this.Artists];
+            copy.sort((l,r) => {
+                if(l.name < r.name) return -1;
+                else if (l.name > r.name) return 1;
+                return 0;
+            });
+            console.log(copy)
+            return copy;
+        }
     },
     apollo: {
         Artists: gql`query {

@@ -21,15 +21,22 @@ export default async () => {
     .then(async db => {
         try {
             
-            execFile(path.join(__dirname, '../../rust/target/release/lil-radio-rust.exe'),
-                [path.join(__dirname, '../sql/db/test.db'), 'D:/Dropbox/Music/Artists'],
-                (err, stdout, stderr) => {
-                    console.log(stdout);
-                    if(err) {
-                        console.log(`Error: ${stderr}`);
-                    }
-                    console.log("Finished sweeping directories!");
-                });
+            let cb = (err, stdout, stderr) => {
+                console.log(stdout);
+                if(err) {
+                    console.log(`Error: ${err}`)
+                    console.log(`Error: ${stderr}`);
+                }
+                console.log("Finished sweeping directories!");
+            }
+            if(process.platform === 'win32') {
+                execFile(path.join(__dirname, '../../rust/target/release/lil-radio-rust.exe'),
+                    [path.join(__dirname, '../sql/db/test.db'), 'D:/Dropbox/Music/Artists'], cb);
+            } else {
+                execFile(path.join(__dirname, '../../rust/target/release/lil-radio-rust'),
+                    [path.join(__dirname, '../sql/db/test.db'), '/Users/djdietrick/Dropbox/Music/Artists'], cb);
+            }
+            
     
             const app = express();
             app.get('/', (req, res) => {
