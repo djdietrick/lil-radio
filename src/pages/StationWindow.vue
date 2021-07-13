@@ -1,20 +1,23 @@
 <template>
     <div class="station" v-if="Station">
-        <div class="station__header">
+        <!-- <div class="station__header">
             <q-toolbar class="bg-primary text-white">
                 <q-toolbar-title>{{Station.name}}</q-toolbar-title>
                 <q-btn flat round dense icon="delete" @click="deleteStation"/>
             </q-toolbar>
         </div>
         <div class="station__content">
-            <Chunk v-for="(chunk, i) in Station.chunks" :key="i" :id="parseInt(chunk.id)" :i="i"/>
-        </div>
+            
+        </div> -->
+        <q-table class="station__table" dense :data="rows" :columns="columns" row-key="id" :title="Station.name"
+                :rows-per-page-options="[0]" :pagination.sync="pagination" hide-bottom virtual-scroll
+                :virtual-scroll-item-size="48" :virtual-scroll-sticky-size-start="48"></q-table>
     </div>
 </template>
 
 <script>
-import gql from 'graphql-tag'
-import Chunk from '../components/station/Chunk.vue';
+import gql from 'graphql-tag';
+import moment from 'moment';
 
 export default {
     props: {
@@ -22,8 +25,86 @@ export default {
             required: true
         }
     },
-    components: {
-        Chunk
+    data() {
+        return {
+            sortMode: 'artist',
+            selected: [],
+            columns: [
+                {
+                    name: 'title',
+                    label: 'Title',
+                    sortable: true,
+                    field: 'title',
+                    align: 'left'
+                },
+                {
+                    name: 'artist',
+                    label: 'Artist',
+                    field: row => row.artist.name,
+                    sortable: true,
+                    align: 'left'
+                },
+                {
+                    name: 'album',
+                    label: 'Album',
+                    field: row => row.album.title,
+                    sortable: true,
+                    align: 'left'
+                },
+                {
+                    name: 'duration',
+                    label: 'Duration',
+                    field: 'duration',
+                    align: 'left',
+                    format: val => `${this.formatTime(val)}`
+                },
+                {
+                    name: 'track',
+                    label: 'Track',
+                    field: 'track',
+                    align: 'left'
+                }
+            ],
+            pagination: {
+                page: 1,
+                rowsPerPage: 0
+            }
+        }
+    },
+    computed: {
+        rows() {
+            let ret = [];
+            if(this.Station) {
+                if(this.sortMode === 'artist') {
+                    let byArtist = {};
+                    for(let song of this.Station.songs) {
+                        if(!byArtist[song.artist.id]) byArtist[song.artist.id] = [];
+                        byArtist[song.artist.id].push(song);
+                    }
+                    for(let key of Object.keys(byArtist)) {
+                        byArtist[key].sort((l, r) => {
+                            if(l.album.id === r.album.id) {
+                                if(l.disk === r.disk) {
+                                    return l.track < r.track;
+                                } else {
+                                    return l.disk < r.disk;
+                                }
+                            } else {
+                                return l.album.title < r.album.title;
+                            }
+                        })
+                    }
+                    for(let key of Object.keys(byArtist)) {
+                        ret.push(...byArtist[key])
+                    }
+                } else if(this.sortMode === 'title') {
+
+                } else if(this.sortMode === 'album') {
+
+                }
+            }
+            return ret;
+        }
     },
     watch: {
         Station: function(val) {
@@ -32,7 +113,7 @@ export default {
             } else {
                 this.$q.loading.hide();
             }
-        }  
+        }
     },
     methods: {
         deleteStation() {
@@ -57,7 +138,11 @@ export default {
                     })
                 })
             })
-        }
+        },
+        formatTime(seconds) {
+            let m = moment.duration(seconds, 'seconds');
+            return `${m.minutes()}:${m.seconds() < 10 ? '0' : ''}${m.seconds()}`
+        },
     },
     apollo: {
         Station: {
@@ -67,12 +152,20 @@ export default {
                         Station(id: ${this.id}) {
                             id
                             name
-                            chunks {
-                                id
-                                songs {
-                                    id
+                            songs {
+                                id,
+                                title,
+                                artist {
+                                    id,
+                                    name
+                                },
+                                album {
+                                    id, 
                                     title
-                                }
+                                },
+                                track,
+                                disk,
+                                duration
                             }
                         }
                     }`
@@ -81,7 +174,7 @@ export default {
                         Station(id: -1) {
                             id
                             name
-                            chunks {
+                            songs {
                                 id
                             }
                         }
@@ -95,8 +188,27 @@ export default {
 
 <style lang="scss" scoped>
 .station {
-    display: grid;
-    grid-template-rows: 5rem 1rem;
+
+    &__table::v-deep {
+        height: 100vh;
+
+        thead tr th {
+            position: sticky;
+            z-index: 3;
+        }
+
+        .q-table__top,
+        .q-table__bottom,
+        thead tr:first-child th {
+            background-color: #fff
+        }
+        thead tr:last-child th {
+            top: 48px
+        }
+        thead tr:first-child th {
+            top: 0 
+        }
+    }
 }
     
 </style>

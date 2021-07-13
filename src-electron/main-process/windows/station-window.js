@@ -19,6 +19,7 @@ class StationWindow extends BrowserWindow {
     });
 
     this.loadURL(url);
+    this.setMenu(null);
     if(devtools)
       this.webContents.openDevTools();
     //this.on('blur', this.onBlur.bind(this));
