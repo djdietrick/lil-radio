@@ -173,7 +173,15 @@ export default {
             this.selectedAlbum = null;
         },
         Album: function(album) {
-            if (album && album.songs) this.songList = album.songs;
+            if (album && album.songs) {
+                this.songList = [...album.songs].sort((l, r) => {
+                    if(l.disk === r.disk) {
+                        return l.track - r.track;
+                    } else {
+                        return l.disk - r.disk;
+                    }
+                });
+            }
             else this.songList = [];
         },
     },
