@@ -20,8 +20,8 @@
                 <h5>{{Album.title}}</h5>
                 <div class="artists__info__songs__list" ref="songlist" id="songlist">
                     <div v-for="(song, i) in songList" :key="song.id" class="artists__info__songs__list__item"
-                        :class="{'artists__info__songs__list__item--seperator': needSeperator(i), 'selected': isSelected(song.id)}"
-                        @click="onClick(song)" draggable="true" @dragstart="drag(song.id, $event)">
+                        :class="{'artists__info__songs__list__item--seperator': needSeperator(i), 'selected': isSelected(i)}"
+                        @click="onClick(i)" draggable="true" @dragstart="drag(song.id, $event)">
                         <span class="track">{{song.track}}</span> 
                         <span class="title">{{song.title}}</span>
                         <span class="duration">{{formatTime(song.duration)}}</span>
@@ -49,21 +49,21 @@
 import gql from 'graphql-tag';
 import moment from 'moment';
 import DoubleClickHandler from '../../mixins/DoubleClickHandler'
-import {mapActions} from 'vuex';
+import Selectable from '../../mixins/Selectable';
+import {mapActions, mapGetters} from 'vuex';
 export default {
     data() {
         return {
             selectedArtist: null,
             selectedAlbum: null,
             songList: [],
-            selected: [],
             shift: false,
             ctrl: false,
             selectedPivot: null
         }
     },
     methods: {
-        ...mapActions(['setQueue', 'selectSong']),
+        ...mapActions(['setQueue', 'selectSong', 'togglePlaying']),
         formatTime(seconds) {
             let m = moment.duration(seconds, 'seconds');
             return `${m.minutes()}:${m.seconds() < 10 ? '0' : ''}${m.seconds()}`
@@ -73,7 +73,7 @@ export default {
         },
         drag(id, e) {
             if(this.selected.length == 0 || (this.selected.length == 1 && this.selected[0] != id)) {
-                this.selected = [id]
+                this.selected = [id];
             }
             e.dataTransfer.dropEffect = "move";
             e.dataTransfer.effectAllowed = "move";
@@ -81,15 +81,15 @@ export default {
         dragAlbum(id, e) {
             e.dataTransfer.dropEffect = "move";
             e.dataTransfer.effectAllowed = "move";
+            this.selectedAlbum = id;
             this.selected = [];
-            for(let song of this.Album.songs) {
-                this.selected.push(song.id);
+            for(let i= 0; i < this.Album.songs.length; i++) {
+                this.selected.push(i);
             }
         },
         drop(e, station) {
             e.preventDefault();
             let songs = this.selected.map(i => parseInt(i));
-            console.log(this.songs);
             this.$apollo.mutate({
                 mutation: gql`mutation ($stationId: ID!, $songs: [ID]!) {
                     addSongsToStation(stationId: $stationId, songs: $songs)
@@ -119,60 +119,20 @@ export default {
         dragleave(e) {
             e.target.classList.remove("draghover")
         },
-        getIndexInSongList(id) {
-            for(let i = 0; i < this.songList.length; i++) {
-                if(this.songList[i].id == id) return i;
-            }
-            return -1;
+        onSingleClick(i) {
+            this.toggleSelect(i);
         },
-        onSingleClick(song) {
-            this.toggleSelect(song.id);
-        },
-        onDoubleClick(song) {
+        onDoubleClick(i) {
             this.setQueue(this.songList);
-            let index = -1;
-            for(let i = 0; i < this.songList.length; i++) {
-                if(this.songList[i].id === song.id) {
-                    index = i;
-                    break;
-                }
-            }
-            this.selectSong(index);
+            this.selectSong(i);
         },
-        toggleSelect(id) {
-            if(this.shift) {
-                if(this.selected.length == 0) {
-                    this.selected = [id];
-                    this.selectedPivot = id;
-                } else {
-                    let pivotInd = this.getIndexInSongList(this.selectedPivot);
-                    let clickInd = this.getIndexInSongList(id);
-                    let start = pivotInd < clickInd ? pivotInd : clickInd;
-                    let end =  pivotInd < clickInd ? clickInd : pivotInd;
-                    this.selected = [];
-                    for(let i = start; i <= end; i++) {
-                        this.selected.push(this.songList[i].id);
-                    }
-                }
-            } else if(this.ctrl) {
-                if(this.selected.indexOf(id) < 0) {
-                    this.selected.push(id);
-                    this.selectedPivot = id;
-                }
-            } else {
-                this.selected = [id];
-                this.selectedPivot = id;
-            }
-        },
-        isSelected(id) {
-            return this.selected.includes(id);
-        }
     },
     watch: {
         selectedArtist: function(val) {
             this.selectedAlbum = null;
         },
         Album: function(album) {
+            this.selected = [];
             if (album && album.songs) {
                 this.songList = [...album.songs].sort((l, r) => {
                     if(l.disk === r.disk) {
@@ -186,6 +146,7 @@ export default {
         },
     },
     computed: {
+        ...mapGetters(['isPlaying']),
         sortedArtists() {
             if(!this.Artists) return [];
             let copy = [...this.Artists];
@@ -284,7 +245,8 @@ export default {
         })
     },
     mixins: [
-        DoubleClickHandler
+        DoubleClickHandler,
+        Selectable
     ]
 }
 </script>

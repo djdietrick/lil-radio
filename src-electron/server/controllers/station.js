@@ -92,11 +92,19 @@ export const addSongToStation = (ctx, {songId, stationId}) => {
     })
 }
 
+export const removeSongsFromStation = (ctx, {songs, stationId}) => {
+    let res = [];
+    for(let songId of songs) {
+        res.push(removeSongFromStation(ctx, {songId, stationId}))
+    }
+    return Promise.all(res);
+}
+
 export const removeSongFromStation = (ctx, {songId, stationId}) => {
     return new Promise(async (resolve, reject) => {
         try {
             const res = await ctx.db.run(`DELETE FROM station_song WHERE stationId=${stationId} AND songId=${songId};`);
-            resolve(res.lastID);
+            resolve(songId);
         } catch(e) {
             reject(e);
         }

@@ -1,6 +1,6 @@
 import * as graphql from 'graphql';
 import {SongType} from './song';
-import { getStation, getStations, insertStation, updateStation, deleteStation, insertSongsIntoStation, removeSongFromStation } from '../controllers/station';
+import { getStation, getStations, insertStation, updateStation, deleteStation, insertSongsIntoStation, removeSongsFromStation } from '../controllers/station';
 
 export const StationType = new graphql.GraphQLObjectType({
     name: 'Station',
@@ -69,14 +69,14 @@ export const StationMutations = {
             return insertSongsIntoStation(context, args);
         }
     },
-    deleteSongFromStation: {
-        type: graphql.GraphQLID,
+    deleteSongsFromStation: {
+        type: graphql.GraphQLList(graphql.GraphQLID),
         args: {
-            songId: {type: graphql.GraphQLNonNull(graphql.GraphQLID)},
+            songs: {type: graphql.GraphQLNonNull(graphql.GraphQLList(graphql.GraphQLID))},
             stationId: {type: graphql.GraphQLNonNull(graphql.GraphQLID)}
         },
         resolve: (root, args, context, info) => {
-            return removeSongFromStation(context, args);
+            return removeSongsFromStation(context, args);
         }
     }
 }

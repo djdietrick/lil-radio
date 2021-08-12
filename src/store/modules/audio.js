@@ -1,6 +1,6 @@
 const state = {
     queue: null,
-    playIndex: 0,
+    playIndex: -1,
     isPlaying: false,
     playStats: {
         duration: 0.0,

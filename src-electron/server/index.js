@@ -3,7 +3,7 @@ import {graphqlHTTP} from 'express-graphql';
 import * as sqlite from 'sqlite';
 import sqlite3 from 'sqlite3';
 import path from 'path';
-import {schema} from './schema';
+import {schema} from './graphql';
 import getPort from 'get-port';
 import {execFile} from 'child_process';
 import {getPathFromSongId} from './controllers/data';

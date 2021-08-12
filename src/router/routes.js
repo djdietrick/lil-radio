@@ -10,6 +10,10 @@ const routes = [
     props: true
   },
   {
+    path: '/settings',
+    component: () => import('pages/Settings.vue')
+  },
+  {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
     children: [

@@ -15,7 +15,7 @@ class StationWindow extends BrowserWindow {
         backgroundThrottling: false,
         nodeIntegration: true,
         webSecurity: false
-    }
+      }
     });
 
     this.loadURL(url);

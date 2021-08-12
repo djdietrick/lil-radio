@@ -1,10 +1,11 @@
 import * as graphql from 'graphql';
-import {ArtistQueries, ArtistMutations} from './graphql/artist';
-import {AlbumQueries, AlbumMutations} from './graphql/album';
-import {SongQueries, SongMutations} from './graphql/song';
-import {DataQueries} from './graphql/data';
-import {StationQueries, StationMutations} from './graphql/station';
-import {ChunkQueries, ChunkMutations} from './graphql/chunk';
+import {ArtistQueries, ArtistMutations} from './artist';
+import {AlbumQueries, AlbumMutations} from './album';
+import {SongQueries, SongMutations} from './song';
+import {DataQueries} from './data';
+import {StationQueries, StationMutations} from './station';
+import {ChunkQueries, ChunkMutations} from './chunk';
+import { SettingsQueries, SettingsMutations } from './settings';
 
 const queryType = new graphql.GraphQLObjectType({
     name: 'Query',
@@ -14,7 +15,8 @@ const queryType = new graphql.GraphQLObjectType({
        ...SongQueries,
        ...DataQueries,
        ...StationQueries,
-       ...ChunkQueries
+       ...ChunkQueries,
+       ...SettingsQueries
     }
 })
 
@@ -25,7 +27,8 @@ const mutationType = new graphql.GraphQLObjectType({
         ...AlbumMutations,
         ...SongMutations,
         ...StationMutations,
-        ...ChunkMutations
+        ...ChunkMutations,
+        ...SettingsMutations
     }
 })
 

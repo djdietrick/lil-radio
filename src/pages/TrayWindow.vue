@@ -1,23 +1,61 @@
 <template>
     <div class="tray">
-        <div class="tray__header">
-            <q-btn outline color="primary" icon="music_note" class="full-width tray__header__btn" @click="openBrowser"/>
-            <q-btn outline color="primary" icon="add" class="full-width tray__header__btn" @click="newStation"/>
-        </div>
-        <div class="tray__stations">
-            <div class="tray__stations__entry" v-for="station in Stations">
-                <div class="tray__stations__entry__name">{{station.name}}</div>
-                <q-btn flat round icon="edit" size="xs" class="tray__stations__entry__edit" @click="editStation(station.id)"/>
+        <template v-if="!selectedStation">
+            <div class="tray__header">
+                <q-btn outline color="primary" icon="music_note" class="full-width tray__header__btn" @click="openBrowser"/>
+                <q-btn outline color="primary" icon="add" class="full-width tray__header__btn" @click="newStation"/>
+                <q-btn outline color="primary" icon="settings" class="full-width tray__header__btn" @click="openSettings"/>
             </div>
-        </div>
+            <div class="tray__stations">
+                <div class="tray__stations__entry" v-for="station in stations">
+                    <div class="tray__stations__entry__name">{{station.name}}</div>
+                    <q-btn flat round icon="play_arrow" size="xs" class="tray__stations__entry__edit" @click="selectStation(station)"/>
+                    <q-btn flat round icon="edit" size="xs" class="tray__stations__entry__edit" @click="editStation(station)"/>
+                </div>
+            </div>
+        </template>
+        <template v-else>
+            <div class="tray__header">
+                <q-btn outline color="primary" icon="arrow_back" class="tray__header__btn" @click="unselectStation()"/>
+                <div class="tray__header__title">
+                    {{selectedStation.name}}
+                </div>
+                <q-btn outline color="primary" icon="music_note" class="tray__header__btn" @click="openBrowser"/>
+                <q-btn outline color="primary" icon="edit" class="tray__header__btn" @click="editStation(selectedStation)"/>
+            </div>
+            <div class="tray__container">
+                <div class="tray__queue">
+                    <div class="tray__queue__item" v-for="(song, i) in songList" :key="i">
+                        
+                    </div>
+                </div>
+                <div class="tray__audio">
+
+                </div>
+            </div>
+        </template>
     </div>
 </template>
 
 <script>
 import gql from 'graphql-tag';
+import {mapActions, mapGetters} from 'vuex';
+import DoubleClickHandler from '../mixins/DoubleClickHandler';
 
 export default {
+    data() {
+        return {
+            selectedStation: null,
+            songList: []
+        }
+    },
+    computed: {
+        ...mapGetters({
+            stations: 'getStations'
+        })
+    },
     methods: {
+        ...mapActions(['fetchStations']),
         newStation() {
             this.$q.dialog({
                 title: 'New Station',
@@ -27,8 +65,8 @@ export default {
                 },
                 cancel: true,
                 persistant: false
-            }).onOk(data => {
-                this.$apollo.mutate({
+            }).onOk(async (data) => {
+                await this.$apollo.mutate({
                     mutation: gql`mutation ($name: String!) {
                         createStation(name: $name) {
                             id
@@ -38,33 +76,56 @@ export default {
                         name: data
                     }
                 })
-                this.$apollo.queries.Stations.refetch();
+                this.fetchStations();
             })
         },
         openBrowser() {
             this.$q.electron.ipcRenderer.send('openBrowser')
         },
-        editStation(id) {
-            this.$q.electron.ipcRenderer.send('editStation', id);
+        openSettings() {
+            this.$q.electron.ipcRenderer.send('openSettings');
+        },
+        editStation(station) {
+            this.$q.electron.ipcRenderer.send('editStation', station);
+        },
+        async selectStation(station) {
+            this.selectedStation = station;
+            const res = await this.$apollo.query({
+                query: gql`query($stationId: ID!) {
+                    Station(id: $stationId) {
+                        songs {
+                            id
+                            title
+                            artist {
+                                id
+                                name
+                            }
+                            album {
+                                id
+                                title
+                            }
+                            duration
+                            track
+                        }
+                    }    
+                }`,
+                variables: {
+                    stationId: station.id
+                }
+            })
+            this.songList = res.data.Station.songs;
+        },
+        unselectStation(station) {
+            this.selectedStation = null;
+            this.songList = [];
         }
     },
-    apollo: {
-        Stations: gql`query {
-            Stations {
-                id
-                name
-            }
-        }`
-    },
     created() {
-        this.$q.electron.ipcRenderer.on('refreshStations', () => {
-            this.$apollo.queries.Stations.refetch();
-        })
-        this.$root.$on('refreshStations', () => {
-            console.log("Refresh");
-            this.$apollo.queries.Stations.refetch();
-        })
-    }
+        this.fetchStations();
+    },
+    mixins: [
+        DoubleClickHandler
+    ]
 }
 </script>
 
@@ -111,6 +172,19 @@ export default {
                 margin-left: auto;
             }
         }
+    }
+
+    &__container {
+        display: grid;
+        grid-template-rows: 5fr 1fr;
+    }
+
+    &__queue {
+        height: 100%;
+        width: 100%;
+    }
+    &__audio {
+        height: 100%;
     }
 }
 </style>

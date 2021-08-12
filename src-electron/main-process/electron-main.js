@@ -1,4 +1,4 @@
-import { app, nativeTheme, ipcMain } from 'electron'
+import { app, nativeTheme, ipcMain, dialog } from 'electron'
 // import db from '../db';
 import server from '../server';
 import MainWindow from './windows/main-window';
@@ -23,6 +23,7 @@ if (process.env.PROD) {
 
 let mainWindow = null;
 let stationWindow = null;
+let settingsWindow = null;
 let graqhqlWindow;
 let tray;
 let trayWindow;
@@ -37,8 +38,22 @@ function createBrowserWindow () {
   mainWindow.focus();
 }
 
-function createStationWindow(id) {
-  stationWindow = new StationWindow(process.env.APP_URL + '/#/station/' + id, true);
+function createSettingsWindow () {
+  if(settingsWindow === null) {
+    settingsWindow = new StationWindow(process.env.APP_URL + '/#/settings/', true);
+    settingsWindow.on('close', () => {
+      settingsWindow = null;
+    })
+  }
+  settingsWindow.focus();
+}
+
+function createStationWindow(station) {
+  stationWindow = new StationWindow(process.env.APP_URL + '/#/station/' + station.id, true);
+  stationWindow.on('page-title-updated', function(e) {
+    e.preventDefault();
+  })
+  stationWindow.setTitle(station.name);
   stationWindow.on('close', () => {
     stationWindow = null;
   })
@@ -73,6 +88,10 @@ app.on('activate', () => {
 
 ipcMain.on('openBrowser', () => {
   createBrowserWindow()
+});
+
+ipcMain.on('openSettings', () => {
+  createSettingsWindow()
 });
 
 ipcMain.on('editStation', (event, arg) => {

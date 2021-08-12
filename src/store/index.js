@@ -1,7 +1,10 @@
+import { isObjectType } from 'graphql';
 import Vue from 'vue'
 import Vuex from 'vuex'
 
 import audio from './modules/audio';
+import stations from './modules/stations';
+import settings from './modules/settings';
 
 Vue.use(Vuex)
 
@@ -17,7 +20,9 @@ Vue.use(Vuex)
 export default function (/* { ssrContext } */) {
   const Store = new Vuex.Store({
     modules: {
-      audio
+      audio,
+      stations,
+      settings
     },
 
     // enable strict mode (adds overhead!)

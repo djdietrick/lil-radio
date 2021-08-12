@@ -77,10 +77,8 @@ export default {
             this.audio.play();
         },
         queue: function(s) {
-            if(this.index === 0) {
-                this.audio.src = convertSong(this.queue[this.index].path);
-                this.audio.play();
-            }
+            this.audio.src = convertSong(this.queue[this.index].path);
+            this.audio.play();
         },
         isPlaying: function(p) {
             if(p) this.audio.play();
