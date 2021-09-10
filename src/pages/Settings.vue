@@ -2,8 +2,8 @@
     <div class="settings">
         <div class="settings__dirs">
             <div class="settings__dirs__title">Music Directories</div>
-            <q-list>
-                <q-item v-for="(dir, i) in dirList" :key="i">
+            <q-list class="settings__dirs__list">
+                <q-item v-for="(dir, i) in dirList" :key="i" class="settings__dirs__list__item">
                     <q-item-section>
                         <q-item-label>{{dir}}</q-item-label>
                     </q-item-section>
@@ -12,7 +12,10 @@
                     </q-item-section>
                 </q-item>
             </q-list>
-            <input type="file" class="settings__dirs__input" webkitdirectory directory @change="addDir">
+            <label class="settings__dirs__input">
+                Add directory
+                <input type="file" webkitdirectory directory @change="addDir">
+            </label>
         </div>
     </div>
 </template>
@@ -117,7 +120,27 @@ export default {
             font-weight: 300;
         }
         &__input {
+            input {
+                display: none;
+            }
+            border: 2px solid $primary;
+            padding: 1rem;
+            cursor: pointer;
+            border-radius: 0.3rem;
+            transition: 0.2s ease-in-out;
 
+            &:hover {
+                background-color: $hover;
+            }
+        }
+
+        &__list {
+            margin-bottom: 2rem;
+
+            &__item {
+                background-color: $area;
+                width: 30rem;
+            }
         }
     }
 }

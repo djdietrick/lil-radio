@@ -113,6 +113,7 @@ export default {
     grid-template-columns: 1fr 1fr;
     place-items: center;
     padding: 1rem;
+    background-color: $dark;
 
     &__progress {
         grid-column: 1 / -1;

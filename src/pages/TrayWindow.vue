@@ -167,7 +167,7 @@ export default {
         padding: 0.5rem;
 
         &__entry {
-            background-color: $grey-4;
+            background-color: $area;
             height: 3rem;
             width: 100%;
             border-radius: 5px;
@@ -177,7 +177,7 @@ export default {
             transition: 0.2s ease-in-out;
 
             &:hover {
-                background-color: $grey-5;
+                background-color: $hover;
             }
 
             &__edit {

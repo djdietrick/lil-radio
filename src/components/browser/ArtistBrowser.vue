@@ -4,7 +4,7 @@
             <div class="artists__list__item" v-for="artist in sortedArtists" :key="artist.id"
                 @click="selectedArtist = artist.id" :class="{ 'selected': selectedArtist == artist.id }">
                 <span>{{artist.name}}</span>
-                <span v-if="selectedArtist == artist.id" class="selected__icon"><q-icon name="chevron_right"></q-icon></span>
+                <!-- <span v-if="selectedArtist == artist.id" class="selected__icon"><q-icon name="chevron_right"></q-icon></span> -->
             </div>
         </div>
 
@@ -279,12 +279,16 @@ export default {
             display: flex;
             align-items: center;
             padding: 1rem;
-            border-bottom: 1px solid rgba(0,0,0,0.2);
+            //border-bottom: 1px solid rgba(0,0,0,0.2);
+            border-radius: 0.3rem;
             cursor: pointer;
             transition: 0.2s ease-in-out;
+            background-color: $area;
+            margin: 0.3rem 0.7rem;
 
             &:hover {
-                background-color: $grey-3;
+                background-color: $hover;
+                transform: scale(1.02);
             }
 
             &--selected {
@@ -308,9 +312,13 @@ export default {
                 border-bottom: 1px solid rgba(0,0,0,0.2);
                 cursor: pointer;
                 transition: 0.2s ease-in-out;
+                background-color: $area;
+                margin: 0.3rem 0.7rem;
+                border-radius: 0.3rem;
 
                 &:hover {
-                    background-color: $grey-3;
+                    background-color: $hover;
+                    transform: scale(1.02);
                 }
 
                 &--selected {
@@ -334,8 +342,12 @@ export default {
                     //height: 1rem;
                     position: relative;
                     
+                    transition: 0.2s ease-in-out;
+                    background-color: $area;
 
-                    background-color: $grey-2;
+                    &:hover {
+                        background-color: $hover;
+                    }
 
                     .track {
                         color: $grey-7;
@@ -385,13 +397,13 @@ export default {
 
     &__add {
         padding: 1rem;
-        background-color: $grey-2;
+        //background-color: $dark;
         //box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
     }
 
     &__entry {
         width: 100%;
-        background-color: $grey-4;
+        background-color: $area;
         border-radius: 0.5rem;
         height: 3rem;
         display: grid;

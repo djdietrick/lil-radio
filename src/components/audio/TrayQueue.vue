@@ -152,7 +152,7 @@ export default {
     height: 60vh;
     overflow-y: auto;
     &__album {
-        background-color: $blue-grey-2;
+        background-color: $area;
         border-radius: 1rem;
         &__title {
             margin-left: 0.5rem;
@@ -175,7 +175,7 @@ export default {
             border-radius: 5px;
 
             &:hover {
-                background-color: white;
+                background-color: $hover;
                 transform: scale(1.01);
             }
 

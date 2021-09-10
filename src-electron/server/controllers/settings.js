@@ -28,3 +28,10 @@ export const insertOrUpdateSetting = (ctx, name, value) => {
         }
     })
 }
+
+export const removeDirectoryData = (ctx, dir) => {
+    return new Promise(async (resolve, reject) => {
+        let data = await ctx.db.all(`SELECT id FROM data WHERE path LIKE '${dir}%'`);
+        console.log(data);
+    })
+}

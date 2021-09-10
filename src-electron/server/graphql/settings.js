@@ -1,5 +1,5 @@
 import * as graphql from "graphql";
-import { getSettings, getSetting, insertOrUpdateSetting } from "../controllers/settings";
+import { getSettings, getSetting, insertOrUpdateSetting, removeDirectoryData } from "../controllers/settings";
 
 export const SettingType = new graphql.GraphQLObjectType({
     name: 'Setting',
@@ -35,7 +35,16 @@ export const SettingsMutations = {
             value: {type: graphql.GraphQLString}
         },
         resolve: (root, {name, value}, context, info) => {
-            insertOrUpdateSetting(context, name, value);
+            return insertOrUpdateSetting(context, name, value);
+        }
+    },
+    removeDirectory: {
+        type: SettingType,
+        args: {
+            dir: {type: graphql.GraphQLString}
+        },
+        resolve: (root, {dir}, context, info) => {
+            return removeDirectoryData(context, dir)
         }
     }
 }

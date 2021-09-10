@@ -109,13 +109,18 @@ export default {
         height: 2rem;
         position: sticky;
         top: 0;
-        background: white;
+        background: $area;
         border-bottom: 1px solid rgb(209, 209, 209);
     }
     &__header {
         height: 100%;
         display: inline-block;
         padding: 0.5rem 0.5rem;
+        transition: 0.3s ease-in-out;
+
+        &:hover {
+            background-color: $hover;
+        }
 
         &__text {
             font-size: 0.8rem;

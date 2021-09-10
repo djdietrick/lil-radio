@@ -1,1 +1,18 @@
 // app global css in SCSS form
+
+body.body--dark {
+    background: $dark;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: $dark;
+}
+
+::-webkit-scrollbar-thumb {
+    background: $primary;
+    border-radius: 2px;
+  }
