@@ -6,8 +6,8 @@ import {BrowserWindow} from 'electron';
 class TrayWindow extends BrowserWindow {
   constructor(url, devtools = false) {
     super({
-      height: 400,
-      width: 300,
+      height: 500,
+      width: 400,
       frame: false,
       resizable: false,
       show: false,

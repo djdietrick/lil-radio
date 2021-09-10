@@ -9,7 +9,9 @@
     "lint": "eslint --ext .js,.vue ./",
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev -m electron",
-    "build:rust": "cd rust && cargo build --release"
+    "build": "quasar build -m electron",
+    "build:rust": "cd rust && cargo build --release",
+    "sql:windows": "cd src-electron/sql/bin && sqlite3.exe ../db/test.db"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
@@ -17,6 +19,7 @@
     "apollo-client": "^2.6.10",
     "apollo-link-http": "^1.5.17",
     "axios": "^0.21.1",
+    "chokidar": "^3.4.3",
     "core-js": "^3.9.1",
     "cors": "^2.8.5",
     "dataurl": "^0.1.0",
@@ -24,6 +27,7 @@
     "express-graphql": "^0.12.0",
     "get-port": "^5.1.1",
     "graphql": "^15.5.0",
+    "lodash": "^4.17.21",
     "moment": "^2.29.1",
     "mp3-duration": "^1.1.0",
     "music-metadata": "^7.6.6",

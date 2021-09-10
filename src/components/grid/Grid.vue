@@ -11,7 +11,10 @@
         <div class="grid__area">
             <div v-for="(row, i) in sortedData" :key="i" class="grid__row" @click="onClick(i)" :class="{grid__row__selected: isSelected(i)}">
                 <div class="grid__row__cell" v-for="col in columns" :style="{ width: col.width + '%' }">
-                    <span class="grid__row__cell__text">{{getCellText(col, row)}}</span>
+                    <span class="grid__row__cell__text">
+                        {{getCellText(col, row)}}
+                        <q-tooltip v-if="getCellText(col, row).length > col.width">{{getCellText(col, row)}}</q-tooltip>
+                    </span>
                 </div>
             </div>
         </div>
@@ -134,13 +137,16 @@ export default {
         border-top: 1px solid rgb(209, 209, 209);
 
         &__selected {
-            background-color: $light-blue-11;
+            background-color: $selected;
         }
 
         &__cell {
             height: 100%;
             display: inline-block;
             padding: 0.3rem 0.5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
 
             &__text {
                 font-size: 0.8rem;

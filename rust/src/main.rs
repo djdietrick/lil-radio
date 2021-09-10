@@ -17,7 +17,9 @@ fn main() -> Result<(), ()> {
     let conn = db::create_connection(db_file).unwrap();
 
     for dir in dirs {
-        sweep::sweep(&conn, dir).unwrap();
+        if dir.len() > 0 {
+            sweep::sweep(&conn, dir).unwrap();
+        }
     }
 
     Ok(())

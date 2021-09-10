@@ -19,9 +19,12 @@
             </div>
         </div>
         <div class="controller__controls">
-            <q-btn round flat icon="fast_rewind" @click="skipBack"/>
-            <q-btn round flat :icon="isPlaying ? 'pause' : 'play_arrow'" @click="togglePlaying"/>
-            <q-btn round flat icon="fast_forward" @click="skipForward"/>
+            <q-btn round flat icon="fast_rewind" @click="skipBack" size="lg"/>
+            <q-btn round flat :icon="isPlaying ? 'pause' : 'play_arrow'" @click="togglePlaying" size="lg"/>
+            <q-btn round flat icon="fast_forward" @click="skipForward" size="lg"/>
+        </div>
+        <div class="controller__shuffle" v-if="shuffle">
+            
         </div>
     </div>
 </template>
@@ -30,6 +33,11 @@
 import {mapGetters, mapActions} from 'vuex';
 import moment from 'moment';
 export default {
+    props: {
+        shuffle: {
+            default: false
+        }
+    },
     computed: {
         ...mapGetters({
             queue: 'getQueue',
@@ -101,9 +109,10 @@ export default {
     width: 100%;
     height: 100%;
     display: grid;
-    grid-template-rows: 2rem 3rem;
+    grid-template-rows: 2rem 3rem min-content;
     grid-template-columns: 1fr 1fr;
     place-items: center;
+    padding: 1rem;
 
     &__progress {
         grid-column: 1 / -1;
@@ -123,7 +132,7 @@ export default {
         &__title {
             grid-row: 1 / -1;
             grid-column: 1 / 2;
-            font-size: 2rem;
+            font-size: 1.4rem;
             font-weight: 300;
         }
         &__artist {

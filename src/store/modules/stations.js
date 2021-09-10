@@ -23,7 +23,6 @@ const actions = {
                 }
             }`
         })
-        console.log(res);
         commit('setStations', res.data.Stations)
     }
 }

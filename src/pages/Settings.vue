@@ -3,29 +3,47 @@
         <div class="settings__dirs">
             <div class="settings__dirs__title">Music Directories</div>
             <q-list>
-
+                <q-item v-for="(dir, i) in dirList" :key="i">
+                    <q-item-section>
+                        <q-item-label>{{dir}}</q-item-label>
+                    </q-item-section>
+                    <q-item-section side>
+                        <q-btn flat icon="close" @click="removeDir(i)"></q-btn>
+                    </q-item-section>
+                </q-item>
             </q-list>
-            <input type="file" webkitdirectory directory @change="addDir">
+            <input type="file" class="settings__dirs__input" webkitdirectory directory @change="addDir">
         </div>
     </div>
 </template>
 
 <script>
 import {mapGetters, mapActions} from 'vuex';
+import gql from 'graphql-tag';
+
 
 export default {
     data() {
         return {
-            newDir: ''
+            newDir: '',
+            dirList: []
         }
     },
     computed: {
         ...mapGetters({
             settings: 'getSettings',
-        })
+        }),
     },
     methods: {
-        ...mapActions(['fetchSettings']),
+        ...mapActions(['fetchSettings', 'updateSetting']),
+        getMusicDirsSetting() {
+            for(let setting of this.settings) {
+                if(setting.name === 'MUSIC_DIRS') {
+                    return setting.value;
+                }
+            }
+            return [];
+        },
         addDir(e) {
             let path1 = e.target.files[0].path;
             let path2 = e.target.files[0].webkitRelativePath;
@@ -34,15 +52,49 @@ export default {
             let end = path2.replace('\\', '/').split('/')[0];
             let finalPath = '';
             for(let chunk of path1arr) {
-                finalPath += chunk + '/';
+                finalPath += chunk;
                 if(chunk == end)
                     break;
+                finalPath += '/';
             }
-            
+            let newValue = this.getMusicDirsSetting() + 
+                (this.dirList.length > 0 ? ';' : '') + finalPath;
+            this.$q.dialog({
+                title: 'New Directory',
+                message: `Do you want to add ${finalPath} as a tracked directory?`,
+                cancel: true,
+                persistant: false
+            }).onOk(async () => {
+                await this.updateSetting({
+                    name: 'MUSIC_DIRS',
+                    value: newValue
+                })
+                this.setDirList();
+            })
+        },
+        removeDir(i) {
+            this.$q.dialog({
+                title: 'Remove Directory',
+                message: `Do you want to remove ${this.dirList[i]}?`,
+                cancel: true,
+                persistant: false
+            }).onOk(async () => {
+                this.dirList.splice(i,1);
+                this.updateSetting({
+                    name: 'MUSIC_DIRS',
+                    value: this.dirList.join(';')
+                })
+            })
+        },
+        setDirList() {
+            let musicDirSetting = this.getMusicDirsSetting();
+            if(musicDirSetting.length === 0) this.dirList = [];
+            else this.dirList = this.getMusicDirsSetting().split(';');
         }
     },
-    created() {
-        this.fetchSettings();
+    async created() {
+        await this.fetchSettings();
+        this.setDirList();
     }
 }
 </script>
@@ -59,6 +111,14 @@ export default {
     &__dirs {
         height: 100%;
         width: 100%;
+
+        &__title {
+            font-size: 1.4rem;
+            font-weight: 300;
+        }
+        &__input {
+
+        }
     }
 }
     

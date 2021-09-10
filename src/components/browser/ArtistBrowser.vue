@@ -21,7 +21,7 @@
                 <div class="artists__info__songs__list" ref="songlist" id="songlist">
                     <div v-for="(song, i) in songList" :key="song.id" class="artists__info__songs__list__item"
                         :class="{'artists__info__songs__list__item--seperator': needSeperator(i), 'selected': isSelected(i)}"
-                        @click="onClick(i)" draggable="true" @dragstart="drag(song.id, $event)">
+                        @click="onClick(i)" draggable="true" @dragstart="drag(i, $event)">
                         <span class="track">{{song.track}}</span> 
                         <span class="title">{{song.title}}</span>
                         <span class="duration">{{formatTime(song.duration)}}</span>
@@ -71,9 +71,9 @@ export default {
         needSeperator(i) {
             return i > 0 && this.Album && this.Album.songs[i].disk != this.Album.songs[i-1].disk
         },
-        drag(id, e) {
-            if(this.selected.length == 0 || (this.selected.length == 1 && this.selected[0] != id)) {
-                this.selected = [id];
+        drag(i, e) {
+            if(this.selected.length == 0 || (this.selected.length == 1 && this.selected[0] != i)) {
+                this.selected = [i];
             }
             e.dataTransfer.dropEffect = "move";
             e.dataTransfer.effectAllowed = "move";
@@ -89,7 +89,7 @@ export default {
         },
         drop(e, station) {
             e.preventDefault();
-            let songs = this.selected.map(i => parseInt(i));
+            let songs = this.selected.map(i => this.Album.songs[i].id);
             this.$apollo.mutate({
                 mutation: gql`mutation ($stationId: ID!, $songs: [ID]!) {
                     addSongsToStation(stationId: $stationId, songs: $songs)
@@ -256,7 +256,7 @@ export default {
     &__browser {
         display: grid;
         grid-template-columns: 15rem 1fr 20rem;        
-        height: 85vh;
+        height: 80vh;
     }
 
     &__list {
@@ -264,8 +264,16 @@ export default {
         flex-direction: column;
         border-right: 1px solid rgba(0,0,0,0.2);
         overflow-y: auto;
-        height: 85vh;
-        box-shadow: 3px 0 0 rgba(0,0,0,0.2);
+        height: 82vh;
+        //box-shadow: 3px 0 0 rgba(0,0,0,0.2);
+
+             // Disable highlighting
+        -webkit-touch-callout: none; /* iOS Safari */
+        -webkit-user-select: none; /* Safari */
+        -khtml-user-select: none; /* Konqueror HTML */
+        -moz-user-select: none; /* Old versions of Firefox */
+            -ms-user-select: none; /* Internet Explorer/Edge */
+                user-select: none;
         
         &__item {
             display: flex;
@@ -280,7 +288,7 @@ export default {
             }
 
             &--selected {
-                background-color: $blue-2 !important;
+                background-color: $selected !important;
             }
         }
     }
@@ -293,7 +301,7 @@ export default {
             flex-direction: column;
             overflow-y: auto;
             border-right: 1px solid rgba(0,0,0,0.2);
-            height: 85vh;
+            height: 82vh;
 
             &__item {
                 padding: 1rem;
@@ -306,7 +314,7 @@ export default {
                 }
 
                 &--selected {
-                    background-color: $blue-2 !important;
+                    background-color: $selected !important;
                 }
             }
         }
@@ -314,7 +322,7 @@ export default {
         &__songs {
             padding: 1rem 1rem;
             overflow-y: auto;
-            height: 85vh;
+            height: 82vh;
 
             &__list {
                 display: flex;
@@ -361,7 +369,7 @@ export default {
 }
 
 .selected {
-    background-color: $blue-2 !important;
+    background-color: $selected !important;
 }
 
 .station {
@@ -389,7 +397,19 @@ export default {
         display: grid;
         place-items: center;
         transition: 0.2s ease-in-out;
+
+        &:not(:last-child) {
+            margin-bottom: 1rem;
+        }
     }
+
+    // Disable highlighting
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Old versions of Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none;
 }
 
 .draghover {

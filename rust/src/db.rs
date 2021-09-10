@@ -1,7 +1,7 @@
 use rusqlite::{Connection, Result, Error, Rows, params};
 use rusqlite::NO_PARAMS;
 use fallible_streaming_iterator::FallibleStreamingIterator;
-use log::{error};
+use log::{info, error};
 
 pub fn create_connection(db_file: &str) -> Result<Connection, Error> {
     //let mut conn = Connection::open("db/test.db")?;
@@ -87,6 +87,12 @@ fn migrate_database(conn: &Connection) -> Result<(), Error> {
         conn.execute("INSERT INTO datatype (id, value) VALUES (?1, ?2);", 
             params![1, "FILE"])?;
     }
+
+    conn.execute("INSERT INTO settings (name, value) VALUES
+            ('MUSIC_DIRS', '');", NO_PARAMS).unwrap_or_else(|_error| {
+                info!("MUSIC_DIRS settings already exists");
+                0
+            });
 
     conn.execute("CREATE TABLE IF NOT EXISTS station (
         id INTEGER PRIMARY KEY AUTOINCREMENT,

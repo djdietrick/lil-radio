@@ -1,5 +1,6 @@
 import client from '../utils/graphql';
 import gql from 'graphql-tag';
+import Vue from 'vue';
 
 const state = {
     settings: []
@@ -16,7 +17,7 @@ const getters = {
 }
 
 const mutations = {
-    setSettings: (state, settings) => state.settings = settings,
+    setSettings: (state, settings) => Vue.set(state, 'settings', settings),
     updateSetting: (state, setting) => {
         for(let i = 0; i < state.settings.length; i++) {
             if(state.settings[i].name === setting.name) {
@@ -42,8 +43,11 @@ const actions = {
     },
     async updateSetting({commit}, setting) {
         const res = await client.mutate({
-            mutation: gql`mutation ($name: String, $value: String) {
-                updateSetting(name: $name, value: $value)
+            mutation: gql`mutation ($name: String!, $value: String!) {
+                updateSetting(name: $name, value: $value) {
+                    name
+                    value
+                }
             }`,
             variables: {
                 name: setting.name,

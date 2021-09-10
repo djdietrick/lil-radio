@@ -23,7 +23,6 @@ class MainWindow extends BrowserWindow {
       this.webContents.openDevTools();
     //this.on('blur', this.onBlur.bind(this));
   }
-
 }
 
 export default MainWindow;

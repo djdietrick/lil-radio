@@ -1,5 +1,5 @@
 <template>
-    <div class="tray">
+    <div class="tray" :class="{'tray--audio': queue && queue.length > 0}">
         <template v-if="!selectedStation">
             <div class="tray__header">
                 <q-btn outline color="primary" icon="music_note" class="full-width tray__header__btn" @click="openBrowser"/>
@@ -20,20 +20,12 @@
                 <div class="tray__header__title">
                     {{selectedStation.name}}
                 </div>
-                <q-btn outline color="primary" icon="music_note" class="tray__header__btn" @click="openBrowser"/>
-                <q-btn outline color="primary" icon="edit" class="tray__header__btn" @click="editStation(selectedStation)"/>
+                <q-btn outline color="primary" icon="music_note" class="tray__header__btn tray__header__btn--right" @click="openBrowser"/>
+                <q-btn outline color="primary" icon="edit" class="tray__header__btn tray__header__btn--right" @click="editStation(selectedStation)"/>
             </div>
-            <div class="tray__container">
-                <div class="tray__queue">
-                    <div class="tray__queue__item" v-for="(song, i) in songList" :key="i">
-                        
-                    </div>
-                </div>
-                <div class="tray__audio">
-
-                </div>
-            </div>
+            <TrayQueue :station="selectedStation"/>
         </template>
+        <BaseAudio v-if="queue && queue.length > 0" :shuffle="true"/>
     </div>
 </template>
 
@@ -41,6 +33,9 @@
 import gql from 'graphql-tag';
 import {mapActions, mapGetters} from 'vuex';
 import DoubleClickHandler from '../mixins/DoubleClickHandler';
+import SongGrid from '../components/grid/SongGrid.vue';
+import TrayQueue from '../components/audio/TrayQueue.vue';
+import BaseAudio from '../components/audio/BaseAudio.vue';
 
 export default {
     data() {
@@ -51,7 +46,8 @@ export default {
     },
     computed: {
         ...mapGetters({
-            stations: 'getStations'
+            stations: 'getStations',
+            queue: 'getQueue'
         })
     },
     methods: {
@@ -76,7 +72,7 @@ export default {
                         name: data
                     }
                 })
-                this.fetchStations();
+                await this.fetchStations();
             })
         },
         openBrowser() {
@@ -90,6 +86,7 @@ export default {
         },
         async selectStation(station) {
             this.selectedStation = station;
+            console.log(station);
             const res = await this.$apollo.query({
                 query: gql`query($stationId: ID!) {
                     Station(id: $stationId) {
@@ -115,17 +112,22 @@ export default {
             })
             this.songList = res.data.Station.songs;
         },
-        unselectStation(station) {
+        unselectStation() {
             this.selectedStation = null;
             this.songList = [];
         }
     },
-    created() {
-        this.fetchStations();
+    async created() {
+        await this.fetchStations();
     },
     mixins: [
         DoubleClickHandler
-    ]
+    ],
+    components: {
+        SongGrid,
+        TrayQueue,
+        BaseAudio
+    }
 }
 </script>
 
@@ -134,11 +136,21 @@ export default {
     display: grid;
     grid-template-rows: 3rem 1fr;
     height: 100vh;
-    width: 100vw;
+    width: 100%;
+
+    &--audio {
+        grid-template-rows: 3rem 2fr 1fr;
+    }
 
     &__header {
         display: flex;
         padding: 5px;
+        justify-content: space-between;
+
+        &__title {
+            align-self: center;
+            font-size: 1.6rem;
+        }
         
         &__btn {
             &:not(:last-child) {
@@ -179,12 +191,6 @@ export default {
         grid-template-rows: 5fr 1fr;
     }
 
-    &__queue {
-        height: 100%;
-        width: 100%;
-    }
-    &__audio {
-        height: 100%;
-    }
+
 }
 </style>

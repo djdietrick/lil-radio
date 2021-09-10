@@ -5,106 +5,128 @@ import sqlite3 from 'sqlite3';
 import path from 'path';
 import {schema} from './graphql';
 import getPort from 'get-port';
-import {execFile} from 'child_process';
 import {getPathFromSongId} from './controllers/data';
-import fs from 'fs';
+import chokidar from 'chokidar';
+import {sweepDir} from './utils/sweep'
 
 const isDev = process.env.NODE_ENV === 'developement';
 
 //sqlite3.verbose();
 
-export default async () => {
-    sqlite.open({
-        filename: path.join(__dirname, '../sql/db/test.db'),
-        driver: sqlite3.Database
-    })
-    .then(async db => {
-        try {
-            
-            let cb = (err, stdout, stderr) => {
-                console.log(stdout);
-                if(err) {
-                    console.log(`Error: ${err}`)
-                    console.log(`Error: ${stderr}`);
-                }
-                console.log("Finished sweeping directories!");
-            }
-            if(process.platform === 'win32') {
-                execFile(path.join(__dirname, '../../rust/target/release/lil-radio-rust.exe'),
-                    [path.join(__dirname, '../sql/db/test.db'), 'D:/Dropbox/Music/Artists'], cb);
-            } else {
-                execFile(path.join(__dirname, '../../rust/target/release/lil-radio-rust'),
-                    [path.join(__dirname, '../sql/db/test.db'), '/Users/djdietrick/Dropbox/Music/Artists'], cb);
-            }
-            
-    
-            const app = express();
-            app.get('/', (req, res) => {
-                res.send(path.join(__dirname, '../../dist/spa/index.html'))
-            })
+class Server {
+    constructor() {
+        this.watchers = [];
+        this.app = express();
+        
+        //const availPort = await getPort();
+        //const port = isDev ? 5000 : availPort
+        this.port = 5000;
 
-            app.use('/api', graphqlHTTP({
-                graphiql: true,
-                pretty: true,
-                schema,
-                context: {
-                    db: {
-                        get: (...args) => db.get(...args),
-                        all: (...args) => db.all(...args),
-                        run: (...args) => db.run(...args)
+        this.init();
+    }
+
+    init() {
+        sqlite.open({
+            filename: path.join(__dirname, '../sql/db/test.db'),
+            driver: sqlite3.Database
+        })
+        .then(async db => {
+            try {
+                this.app.use('/api', graphqlHTTP({
+                    graphiql: true,
+                    pretty: true,
+                    schema,
+                    context: {
+                        db: {
+                            get: (...args) => db.get(...args),
+                            all: (...args) => db.all(...args),
+                            run: (...args) => db.run(...args)
+                        }
                     }
-                }
-            }))
-
-            app.get('/song/:id', async (req, res) => {
-                const range = req.headers.range;
-                if (!range) {
-                    res.status(400).send("Requires Range header");
+                }))
+                
+                let musicDirs = '';
+                try {
+                    musicDirs = await db.get("SELECT value FROM settings WHERE name='MUSIC_DIRS'");
+                    musicDirs = musicDirs.value;
+                } catch(e) {
+                    console.log('DB does not exist, creating...');
                 }
                 
-                try {
-                    let path = await getPathFromSongId({db}, req.params.id);
-                    
-                    const songSize = fs.statSync(path).size;
-                    const chunkSize = 10 ** 5;
-                    const start = Number(range.replace(/\D/g, ""));
-                    const end = Math.min(start + chunkSize, songSize - 1);
+                // let p = process.platform === 'win32' ? 'D:/Dropbox/Music/Artists/' : '/Users/djdietrick/Dropbox/Music/Artists';
+                // sweepDir(p);
 
-                    const contentLength = end - start + 1;
-                    const headers = {
-                        "Content-Range": `bytes ${start}-${end}/${songSize}`,
-                        "Accept-Ranges": "bytes",
-                        "Content-Length": contentLength,
-                        "Content-Type": "audio/mp3",
-                    };
-
-                    // HTTP Status 206 for Partial Content
-                    res.writeHead(206, headers);
-
-                    // create video read stream for this particular chunk
-                    const audioStream = fs.createReadStream(path, { start, end });
-
-                    // Stream the video chunk to the client
-                    audioStream.pipe(res);
-
-                } catch(e) {
-                    return res.status(500).send("Could not find song with id " + req.params.id);
+                if(musicDirs.length > 0) {
+                    for(let dir of musicDirs.split(';')) {
+                        this.addWatcher(dir);
+                    }
+                } else {
+                    // Empty sweep will just create db
+                    sweepDir(musicDirs);
                 }
-            });
-            
-            const availPort = await getPort();
-            //const port = isDev ? 5000 : availPort
-            const port = 5000;
-        
-            app.listen(port, () => {
-                console.log(`Server now up on http://localhost:${port}`);
-            })
-        } catch(e) {
-            console.log(e);
-        }
-        
-    })
-    .catch(err => console.log(err))
+                
+            } catch(e) {
+                console.log(e);
+            }
+        }).catch(e => console.log(e));
+    }
+
+    async addWatcher(dir) {
+        await sweepDir(dir);
+        this.watchers.push(chokidar.watch(dir, {persistent: true, ignoreInitial: true}).on('all', (e, p) => {
+            console.log(`Detected update in location [${p}]`);
+            sweepDir(p);
+        }).on('ready', () => {
+            console.log(`Now watching ${dir} for updates`);
+        }))
+    }
+
+    listen() {
+        this.app.listen(this.port, () => {
+            console.log(`Server now up on http://localhost:${this.port}`);
+        })
+    }
 }
 
+export default Server;
 
+// CODE FOR STREAMING OVER THE WEB, NOT WORKING
+
+// app.get('/', (req, res) => {
+//     res.send(path.join(__dirname, '../../dist/spa/index.html'))
+// })
+// app.get('/song/:id', async (req, res) => {
+//     const range = req.headers.range;
+//     if (!range) {
+//         res.status(400).send("Requires Range header");
+//     }
+    
+//     try {
+//         let path = await getPathFromSongId({db}, req.params.id);
+        
+//         const songSize = fs.statSync(path).size;
+//         const chunkSize = 10 ** 5;
+//         const start = Number(range.replace(/\D/g, ""));
+//         const end = Math.min(start + chunkSize, songSize - 1);
+
+//         const contentLength = end - start + 1;
+//         const headers = {
+//             "Content-Range": `bytes ${start}-${end}/${songSize}`,
+//             "Accept-Ranges": "bytes",
+//             "Content-Length": contentLength,
+//             "Content-Type": "audio/mp3",
+//         };
+
+//         // HTTP Status 206 for Partial Content
+//         res.writeHead(206, headers);
+
+//         // create video read stream for this particular chunk
+//         const audioStream = fs.createReadStream(path, { start, end });
+
+//         // Stream the video chunk to the client
+//         audioStream.pipe(res);
+
+//     } catch(e) {
+//         return res.status(500).send("Could not find song with id " + req.params.id);
+//     }
+// });

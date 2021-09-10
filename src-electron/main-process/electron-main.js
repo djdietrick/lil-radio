@@ -1,6 +1,6 @@
 import { app, nativeTheme, ipcMain, dialog } from 'electron'
 // import db from '../db';
-import server from '../server';
+import Server from '../server';
 import MainWindow from './windows/main-window';
 import MainTray from './windows/tray';
 import TrayWindow from './windows/tray-window';
@@ -27,6 +27,8 @@ let settingsWindow = null;
 let graqhqlWindow;
 let tray;
 let trayWindow;
+
+const server = new Server();
 
 function createBrowserWindow () {
   if(mainWindow === null) {
@@ -60,7 +62,7 @@ function createStationWindow(station) {
 }
 
 async function start() {
-  await server();
+  server.listen();
   graqhqlWindow = new MainWindow("http://localhost:5000/api", false);
 
   trayWindow = new TrayWindow(process.env.APP_URL + '/#/tray', true);
@@ -69,7 +71,7 @@ async function start() {
   //createBrowserWindow();
 }
 
-app.on('ready', () => {
+app.on('ready', async () => {
   require('vue-devtools').install();
   start();
 })

@@ -1,6 +1,6 @@
 export const getSettings = ctx => {
     return new Promise((resolve, reject) => {
-        ctx.db.all('SELECT * FROM settings;')
+        ctx.db.all('SELECT * FROM settings')
             .then(result => resolve(result))
             .catch(err => reject(err))
     })
@@ -17,7 +17,6 @@ export const getSetting = (ctx, name) => {
 export const insertOrUpdateSetting = (ctx, name, value) => {
     return new Promise(async (resolve, reject) => {
         let setting = await getSetting(ctx, name);
-        console.log(setting);
         if(setting) {
             ctx.db.run(`UPDATE settings SET value='${value}' WHERE name='${name}'`)
                 .then(() => resolve({name, value}))

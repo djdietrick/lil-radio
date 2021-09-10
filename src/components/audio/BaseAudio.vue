@@ -1,7 +1,7 @@
 <template>
     <div class="baseaudio">
         <Audio />
-        <Controller />
+        <Controller :shuffle="shuffle"/>
     </div>
 </template>
 
@@ -9,6 +9,11 @@
 import Controller from './Controller.vue';
 import Audio from './Audio.vue';
 export default {
+    props: {
+        shuffle: {
+            default: false
+        }
+    },
     components: {
         Controller,
         Audio
