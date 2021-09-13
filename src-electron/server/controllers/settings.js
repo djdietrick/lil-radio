@@ -1,3 +1,5 @@
+import { _ } from "core-js"
+
 export const getSettings = ctx => {
     return new Promise((resolve, reject) => {
         ctx.db.all('SELECT * FROM settings')
@@ -31,7 +33,31 @@ export const insertOrUpdateSetting = (ctx, name, value) => {
 
 export const removeDirectoryData = (ctx, dir) => {
     return new Promise(async (resolve, reject) => {
-        let data = await ctx.db.all(`SELECT id FROM data WHERE path LIKE '${dir}%'`);
-        console.log(data);
+        try {
+            let data = await ctx.db.all(`SELECT id FROM data WHERE path LIKE '${dir}%'`);
+            data = data.map(d => d.id)
+            let songData = await ctx.db.all(`SELECT * FROM song_data WHERE dataId IN (${data.join(",")})`);
+            let songIdsStr = songData.map(d => d.songId).join(",")
+            let songs = await ctx.db.all(`SELECT DISTINCT artistId, albumId FROM song WHERE id IN (${songIdsStr})`);
+            let artistIds = new Set(); let albumIds = new Set();
+            for(let song of songs) {
+                artistIds.add(song.artistId);
+                albumIds.add(song.albumId);
+            }
+            await ctx.db.run(`DELETE FROM song WHERE id IN (${songIdStr})`)
+            
+            songs = await ctx.db.all(`SELECT artistId, albumId AS CNT FROM song WHERE artistId IN (${artistIds.join(',')}) OR albumId IN (${albumIds.join(',')})`);
+            for(let song of songs) {
+                artistIds.delete(song.artistId);
+                albumIds.delete(song.albumId);
+            }
+            await ctx.db.run(`DELETE FROM album WHERE id IN (${albumIds.join(',')})`);
+            await ctx.db.run(`DELETE FROM artist WHERE id IN (${artistIds.join(',')})`);
+            resolve();
+        } catch(e) {
+            console.log(e);
+            reject(e);
+        }
+        
     })
 }
