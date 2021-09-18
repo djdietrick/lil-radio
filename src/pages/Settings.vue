@@ -38,7 +38,7 @@ export default {
         }),
     },
     methods: {
-        ...mapActions(['fetchSettings', 'updateSetting']),
+        ...mapActions(['fetchSettings', 'updateSetting', 'addDirectory', 'removeDirectory']),
         getMusicDirsSetting() {
             for(let setting of this.settings) {
                 if(setting.name === 'MUSIC_DIRS') {
@@ -68,10 +68,12 @@ export default {
                 cancel: true,
                 persistant: false
             }).onOk(async () => {
-                await this.updateSetting({
-                    name: 'MUSIC_DIRS',
-                    value: newValue
-                })
+                // await this.updateSetting({
+                //     name: 'MUSIC_DIRS',
+                //     value: newValue
+                // })
+                await this.addDirectory(newValue);
+
                 this.setDirList();
             })
         },
@@ -82,11 +84,13 @@ export default {
                 cancel: true,
                 persistant: false
             }).onOk(async () => {
+                let dir = this.dirList[i]
                 this.dirList.splice(i,1);
-                this.updateSetting({
-                    name: 'MUSIC_DIRS',
-                    value: this.dirList.join(';')
-                })
+                // this.updateSetting({
+                //     name: 'MUSIC_DIRS',
+                //     value: this.dirList.join(';')
+                // })
+                this.removeDirectory(dir);
             })
         },
         setDirList() {

@@ -8,6 +8,7 @@ import getPort from 'get-port';
 import {getPathFromSongId} from './controllers/data';
 import chokidar from 'chokidar';
 import {sweepDir} from './utils/sweep'
+import { format } from 'url';
 
 const isDev = process.env.NODE_ENV === 'developement';
 
@@ -79,6 +80,19 @@ class Server {
         }).on('ready', () => {
             console.log(`Now watching ${dir} for updates`);
         }))
+    }
+
+    removeWatcher(dir) {
+        for(let i = 0; i < this.watchers.length; i++) {
+            let watched = this.watchers[i].getWatched();
+            let watchedDir = Object.keys(watched)[0];
+            if(watchedDir.indexOf(dir) != -1) {
+                console.log(`Unwatching ${dir}`)
+                this.watchers[i].unwatch(dir);
+                this.watchers.splice(i, 1);
+                return;
+            }            
+        }
     }
 
     listen() {

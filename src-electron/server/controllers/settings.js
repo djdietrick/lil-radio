@@ -1,4 +1,4 @@
-import { _ } from "core-js"
+import {ipcRenderer} from 'electron';
 
 export const getSettings = ctx => {
     return new Promise((resolve, reject) => {
@@ -31,9 +31,41 @@ export const insertOrUpdateSetting = (ctx, name, value) => {
     })
 }
 
+export const addDirectoryData = (ctx, dir) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            ipcRenderer.send('addWatcher', dir);
+            let name = 'MUSIC_DIRS';
+            let setting = await getSetting(ctx, name);
+            if(setting) {
+                let newVal = setting.value + setting.value > 0 ? ';' : '' + dir;
+                await ctx.db.run(`UPDATE settings SET value='${newVal}' WHERE name='${name}'`);
+                resolve({name, value: newVal})
+            } else {
+                ctx.db.run(`INSERT INTO settings (name, value) VALUES ('MUSIC_DIRS', ${dir}`);
+                resolve({name, value: dir})
+            }
+        } catch(e) {
+            reject(e);
+        }
+        
+    })
+}
+
 export const removeDirectoryData = (ctx, dir) => {
     return new Promise(async (resolve, reject) => {
         try {
+            ipcRenderer.send('removeWatcher', dir);
+
+            let name = 'MUSIC_DIRS';
+            let setting = await getSetting(ctx, name);
+            if(setting.value.indexOf(';' + dir) != -1) {
+                setting.value = setting.value.replace(';' + dir, '');
+            } else {
+                setting.value = setting.value.replace(dir, '');
+            }
+            await ctx.db.run(`UPDATE setting SET value='${setting.value}' WHERE name='${name}'`)
+
             let data = await ctx.db.all(`SELECT id FROM data WHERE path LIKE '${dir}%'`);
             data = data.map(d => d.id)
             let songData = await ctx.db.all(`SELECT * FROM song_data WHERE dataId IN (${data.join(",")})`);
@@ -53,7 +85,7 @@ export const removeDirectoryData = (ctx, dir) => {
             }
             await ctx.db.run(`DELETE FROM album WHERE id IN (${albumIds.join(',')})`);
             await ctx.db.run(`DELETE FROM artist WHERE id IN (${artistIds.join(',')})`);
-            resolve();
+            resolve(setting);
         } catch(e) {
             console.log(e);
             reject(e);

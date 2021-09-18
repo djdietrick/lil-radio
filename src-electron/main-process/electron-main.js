@@ -106,3 +106,11 @@ ipcMain.on('closeStation', () => {
   }
   stationWindow = null;
 })
+
+ipcMain.on('addWatcher', (dir) => {
+  server.addWatcher(dir);
+})
+
+ipcMain.on('removeWatcher', (dir) => {
+  server.removeWatcher(dir);
+})

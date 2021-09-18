@@ -55,6 +55,34 @@ const actions = {
             }
         })
         commit('updateSetting', setting);
+    },
+    async addDirectory({commit}, dir) {
+        const res = await client.mutate({
+            mutation: gql`mutation ($dir: String) {
+                addDirectory(dir: $dir) {
+                    name
+                    value
+                }
+            }`,
+            variables: {
+                dir
+            }
+        })
+        commit('updateSetting', res);
+    },
+    async removeDirectory({commit, dir}) {
+        const res = await client.mutate({
+            mutation: gql`mutation ($dir: String) {
+                removeDirectory(dir: $dir) {
+                    name
+                    value
+                }
+            }`,
+            variables: {
+                dir
+            }
+        })
+        commit('updateSetting', res);
     }
 }
 
