@@ -16,11 +16,11 @@ export function sweepDir(dir) {
         console.log(`Sweeping directory ${dir}`);
     
         if(process.platform === 'win32') {
-            execFile(path.join(__dirname, '../../../rust/target/release/lil-radio-rust.exe'),
-                [path.join(__dirname, '../../sql/db/test.db'), dir], cb);
+            execFile(path.join(__dirname, '../../rust/target/release/lil-radio-rust.exe'),
+                [path.join(__dirname, '../../db/db/test.db'), dir], cb);
         } else {
-            execFile(path.join(__dirname, '../../../rust/target/release/lil-radio-rust'),
-                [path.join(__dirname, '../../sql/db/test.db'), dir], cb);
+            execFile(path.join(__dirname, '../../rust/target/release/lil-radio-rust'),
+                [path.join(__dirname, '../../db/db/test.db'), dir], cb);
         }
     })
 } 

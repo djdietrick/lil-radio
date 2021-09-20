@@ -28,7 +28,7 @@ class Server {
 
     init() {
         sqlite.open({
-            filename: path.join(__dirname, '../sql/db/test.db'),
+            filename: path.join(__dirname, '../db/db/test.db'),
             driver: sqlite3.Database
         })
         .then(async db => {

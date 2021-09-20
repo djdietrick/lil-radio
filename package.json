@@ -11,7 +11,8 @@
     "dev": "quasar dev -m electron",
     "build": "quasar build -m electron",
     "build:rust": "cd rust && cargo build --release",
-    "sql:windows": "cd src-electron/sql/bin && sqlite3.exe ../db/test.db"
+    "sql:windows": "cd db/bin && sqlite3.exe ../db/test.db",
+    "sql:mac": "cd db/bin && sqlite3 ../db/test.db"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",

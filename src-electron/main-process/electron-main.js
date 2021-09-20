@@ -1,6 +1,6 @@
 import { app, nativeTheme, ipcMain, dialog } from 'electron'
 // import db from '../db';
-import Server from '../server';
+import Server from '../../server';
 import MainWindow from './windows/main-window';
 import MainTray from './windows/tray';
 import TrayWindow from './windows/tray-window';
@@ -40,7 +40,7 @@ function createBrowserWindow () {
   mainWindow.focus();
 }
 
-function createSettingsWindow () {
+export function createSettingsWindow () {
   if(settingsWindow === null) {
     settingsWindow = new StationWindow(process.env.APP_URL + '/#/settings/', true);
     settingsWindow.on('close', () => {
@@ -107,10 +107,10 @@ ipcMain.on('closeStation', () => {
   stationWindow = null;
 })
 
-ipcMain.on('addWatcher', (dir) => {
+export const addWatcher = (dir) => {
   server.addWatcher(dir);
-})
+}
 
-ipcMain.on('removeWatcher', (dir) => {
+export const removeWatcher = (dir) => {
   server.removeWatcher(dir);
-})
+}

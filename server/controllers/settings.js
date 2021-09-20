@@ -1,4 +1,4 @@
-import {ipcRenderer} from 'electron';
+import {addWatcher, removeWatcher} from '../../src-electron/main-process/electron-main';
 
 export const getSettings = ctx => {
     return new Promise((resolve, reject) => {
@@ -34,7 +34,7 @@ export const insertOrUpdateSetting = (ctx, name, value) => {
 export const addDirectoryData = (ctx, dir) => {
     return new Promise(async (resolve, reject) => {
         try {
-            ipcRenderer.send('addWatcher', dir);
+            addWatcher(dir);
             let name = 'MUSIC_DIRS';
             let setting = await getSetting(ctx, name);
             if(setting) {
@@ -55,19 +55,25 @@ export const addDirectoryData = (ctx, dir) => {
 export const removeDirectoryData = (ctx, dir) => {
     return new Promise(async (resolve, reject) => {
         try {
-            ipcRenderer.send('removeWatcher', dir);
+            removeWatcher(dir);
 
             let name = 'MUSIC_DIRS';
             let setting = await getSetting(ctx, name);
             if(setting.value.indexOf(';' + dir) != -1) {
-                setting.value = setting.value.replace(';' + dir, '');
+                let newValue = setting.value.replace(';' + dir, '');
+                setting.value = newValue
             } else {
-                setting.value = setting.value.replace(dir, '');
+                let newValue = setting.value.replace(dir, '');
+                console.log(setting.value);
+                console.log(newValue)
+                console.log(dir);
+                setting.value = newValue;
             }
-            await ctx.db.run(`UPDATE setting SET value='${setting.value}' WHERE name='${name}'`)
+            await ctx.db.run(`UPDATE settings SET value='${setting.value}' WHERE name='${name}'`);
 
-            let data = await ctx.db.all(`SELECT id FROM data WHERE path LIKE '${dir}%'`);
+            let data = await ctx.db.all(`SELECT id FROM data WHERE path LIKE '%${dir}%'`);
             data = data.map(d => d.id)
+            console.log(`Found ${data.length} data`)
             let songData = await ctx.db.all(`SELECT * FROM song_data WHERE dataId IN (${data.join(",")})`);
             let songIdsStr = songData.map(d => d.songId).join(",")
             let songs = await ctx.db.all(`SELECT DISTINCT artistId, albumId FROM song WHERE id IN (${songIdsStr})`);
@@ -76,15 +82,18 @@ export const removeDirectoryData = (ctx, dir) => {
                 artistIds.add(song.artistId);
                 albumIds.add(song.albumId);
             }
-            await ctx.db.run(`DELETE FROM song WHERE id IN (${songIdStr})`)
+            await ctx.db.run(`DELETE FROM song WHERE id IN (${songIdsStr})`)
+            console.log(`Deleted ${songData.length} song(s)`)
             
-            songs = await ctx.db.all(`SELECT artistId, albumId AS CNT FROM song WHERE artistId IN (${artistIds.join(',')}) OR albumId IN (${albumIds.join(',')})`);
+            songs = await ctx.db.all(`SELECT artistId, albumId AS CNT FROM song WHERE artistId IN (${Array.from(artistIds).join(',')}) OR albumId IN (${Array.from(albumIds).join(',')})`);
             for(let song of songs) {
                 artistIds.delete(song.artistId);
                 albumIds.delete(song.albumId);
             }
-            await ctx.db.run(`DELETE FROM album WHERE id IN (${albumIds.join(',')})`);
-            await ctx.db.run(`DELETE FROM artist WHERE id IN (${artistIds.join(',')})`);
+            await ctx.db.run(`DELETE FROM album WHERE id IN (${Array.from(albumIds).join(',')})`);
+            console.log(`Deleted ${albumIds.size} album(s)`)
+            await ctx.db.run(`DELETE FROM artist WHERE id IN (${Array.from(artistIds).join(',')})`);
+            console.log(`Deleted ${artistIds.size} artist(s)`)
             resolve(setting);
         } catch(e) {
             console.log(e);
