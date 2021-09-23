@@ -10,7 +10,8 @@
     "test": "echo \"No test specified\" && exit 0",
     "dev": "quasar dev -m electron",
     "build": "quasar build -m electron",
-    "build:rust": "cd rust && cargo build --release",
+    "rust:build": "cd rust && cargo build --release",
+    "rust:test": "cd rust && cargo test",
     "sql:windows": "cd db/bin && sqlite3.exe ../db/test.db",
     "sql:mac": "cd db/bin && sqlite3 ../db/test.db"
   },

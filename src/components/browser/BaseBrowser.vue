@@ -2,7 +2,7 @@
 
     <q-layout view="hHh LpR fFf">
 
-        <q-header bordered class="bg-primary text-white" height-hint="98">
+        <q-header bordered class="bg-primary text-white" height-hint="98" v-if="selected != 'blank'">
             <q-toolbar>
                 <!-- <q-tabs align="left" v-model="selected" dense>
                     <q-tab name="artists" label="Artists"></q-tab>
@@ -22,7 +22,7 @@
             </q-page>
         </q-page-container>
 
-        <q-footer elevated class="bg-white text-primary">
+        <q-footer elevated class="bg-white text-primary" v-if="selected != 'blank'">
             <base-audio></base-audio>
         </q-footer>
 
@@ -33,11 +33,14 @@
 import ArtistBrowser from './ArtistBrowser.vue';
 import SearchBrowser from './SearchBrowser.vue';
 import BaseAudio from '../audio/BaseAudio.vue';
+import NoMusic from './NoMusic.vue';
+import gql from 'graphql-tag';
 export default {
     components: {
         'artists': ArtistBrowser,
         'search': SearchBrowser,
-        'base-audio': BaseAudio
+        'base-audio': BaseAudio,
+        'blank': NoMusic
     },
     data() {
         return {
@@ -46,10 +49,20 @@ export default {
     },
     computed: {
         selected() {
+            if(this.Artists && this.Artists.length == 0)
+                return 'blank'
             if(this.search.length > 0)
                 return 'search';
             return 'artists';
         }
+    },
+    apollo: {
+        Artists: gql`query {
+            Artists {
+                id,
+                name
+            }
+        }`
     }
 }
 </script>

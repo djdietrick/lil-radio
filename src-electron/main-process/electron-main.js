@@ -40,7 +40,7 @@ function createBrowserWindow () {
   mainWindow.focus();
 }
 
-export function createSettingsWindow () {
+export const createSettingsWindow = () => {
   if(settingsWindow === null) {
     settingsWindow = new StationWindow(process.env.APP_URL + '/#/settings/', true);
     settingsWindow.on('close', () => {

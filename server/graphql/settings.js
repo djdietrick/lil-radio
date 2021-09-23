@@ -1,5 +1,6 @@
 import * as graphql from "graphql";
 import { getSettings, getSetting, insertOrUpdateSetting, removeDirectoryData, addDirectoryData} from "../controllers/settings";
+import fs from 'fs';
 
 export const SettingType = new graphql.GraphQLObjectType({
     name: 'Setting',
@@ -54,6 +55,21 @@ export const SettingsMutations = {
         },
         resolve: (root, {dir}, context, info) => {
             return removeDirectoryData(context, dir)
+        }
+    },
+    checkDirectory: {
+        type: graphql.GraphQLBoolean,
+        args: {
+            dir: {type: graphql.GraphQLString}
+        },
+        resolve: (root, {dir}, context, info) => {
+            return new Promise((resolve, reject) => {
+                try {
+                    resolve(fs.existsSync(dir) && fs.lstatSync(dir).isDirectory())
+                } catch(e) {
+                    resolve(false);
+                }
+            })
         }
     }
 }

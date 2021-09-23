@@ -1,7 +1,7 @@
 <template>
     <div class="settings">
         <div class="settings__dirs">
-            <div class="settings__dirs__title">Music Directories</div>
+            <div class="settings__dirs__title q-mb-lg">Music Directories</div>
             <q-list class="settings__dirs__list">
                 <q-item v-for="(dir, i) in dirList" :key="i" class="settings__dirs__list__item">
                     <q-item-section>
@@ -12,10 +12,14 @@
                     </q-item-section>
                 </q-item>
             </q-list>
-            <label class="settings__dirs__input">
+            <div class="settings__dirs__input">
+                <q-input label="New directory" class="settings__dirs__input__input" outlined v-model="newDir" :error="dirError" :error-message="dirErrorMsg"></q-input>
+                <q-btn label="Add" @click="addDir" class="settings__dirs__input__btn" :disable="newDir.length == 0"></q-btn>
+            </div>
+            <!-- <label class="settings__dirs__input">
                 Add directory
                 <input type="file" webkitdirectory directory @change="addDir">
-            </label>
+            </label> -->
         </div>
     </div>
 </template>
@@ -29,7 +33,9 @@ export default {
     data() {
         return {
             newDir: '',
-            dirList: []
+            dirList: [],
+            dirError: false,
+            dirErrorMsg: ''
         }
     },
     computed: {
@@ -38,7 +44,7 @@ export default {
         }),
     },
     methods: {
-        ...mapActions(['fetchSettings', 'updateSetting', 'addDirectory', 'removeDirectory']),
+        ...mapActions(['fetchSettings', 'updateSetting', 'addDirectory', 'removeDirectory', 'checkDirectory']),
         getMusicDirsSetting() {
             for(let setting of this.settings) {
                 if(setting.name === 'MUSIC_DIRS') {
@@ -47,21 +53,10 @@ export default {
             }
             return [];
         },
-        addDir(e) {
-            let path1 = e.target.files[0].path;
-            let path2 = e.target.files[0].webkitRelativePath;
-            path1 = path1.replace(/\\/g, '/')
-            let path1arr = path1.split('/');
-            let end = path2.replace('\\', '/').split('/')[0];
-            let finalPath = '';
-            for(let chunk of path1arr) {
-                finalPath += chunk;
-                if(chunk == end)
-                    break;
-                finalPath += '/';
-            }
-            let newValue = this.getMusicDirsSetting() + 
-                (this.dirList.length > 0 ? ';' : '') + finalPath;
+        addDir() {
+            this.dirError = false;
+            let finalPath = this.newDir.replace(/\\/g, '/');
+            //if(finalPath[finalPath.length - 1] != '/') finalPath += '/';
             this.$q.dialog({
                 title: 'New Directory',
                 message: `Do you want to add ${finalPath} as a tracked directory?`,
@@ -72,9 +67,15 @@ export default {
                 //     name: 'MUSIC_DIRS',
                 //     value: newValue
                 // })
-                await this.addDirectory(newValue);
-
-                this.setDirList();
+                let valid = await this.checkDirectory(finalPath);
+                if(valid) {
+                    this.newDir = '';
+                    await this.addDirectory(finalPath);
+                    this.setDirList();
+                } else {
+                    this.dirError = true;
+                    this.dirErrorMsg = 'Path is not a directory, please try again'
+                }
             })
         },
         removeDir(i) {
@@ -124,17 +125,27 @@ export default {
             font-weight: 300;
         }
         &__input {
-            input {
-                display: none;
-            }
-            border: 2px solid $primary;
-            padding: 1rem;
+            display: grid;
+            grid-template-columns: 80% 1fr;
+            align-items: center;
             cursor: pointer;
-            border-radius: 0.3rem;
             transition: 0.2s ease-in-out;
 
-            &:hover {
-                background-color: $hover;
+            &__input {
+                transform: translateY(0.7rem);
+            }
+
+            &__btn {
+                margin-left: 1rem;
+                height: 80%;
+                background-color: $area;
+                color: white;
+                transition: 0.2s ease-in-out;
+
+                &:hover {
+                    background-color: $primary;
+                    transform: scale(1.02);
+                }
             }
         }
 
@@ -144,6 +155,9 @@ export default {
             &__item {
                 background-color: $area;
                 width: 30rem;
+                &:not(:last-child) {
+                    margin-bottom: 1rem;
+                }
             }
         }
     }

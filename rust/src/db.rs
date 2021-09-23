@@ -28,7 +28,7 @@ fn migrate_database(conn: &Connection) -> Result<(), Error> {
             name TEXT NOT NULL
         );", NO_PARAMS)?;
 
-    conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS artist_name ON artist (name);", NO_PARAMS)?;
+    //conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS artist_name ON artist (name);", NO_PARAMS)?;
 
     conn.execute("CREATE TABLE IF NOT EXISTS album (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -37,7 +37,7 @@ fn migrate_database(conn: &Connection) -> Result<(), Error> {
         FOREIGN KEY(artistId) REFERENCES artist(id) ON DELETE CASCADE
     );", NO_PARAMS)?;
 
-    conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS unique_album ON album (title, artistId);", NO_PARAMS)?;
+    //conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS unique_album ON album (title, artistId);", NO_PARAMS)?;
 
     conn.execute("CREATE TABLE IF NOT EXISTS song (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -66,7 +66,7 @@ fn migrate_database(conn: &Connection) -> Result<(), Error> {
         FOREIGN KEY(datatypeId) REFERENCES datatype(id) ON DELETE CASCADE
     );", NO_PARAMS)?;
 
-    conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS data_path ON data (path);", NO_PARAMS)?;
+    //conn.execute("CREATE UNIQUE INDEX IF NOT EXISTS data_path ON data (path);", NO_PARAMS)?;
 
     conn.execute("CREATE TABLE IF NOT EXISTS song_data (
         songId INTEGER NOT NULL UNIQUE,
@@ -75,7 +75,7 @@ fn migrate_database(conn: &Connection) -> Result<(), Error> {
         FOREIGN KEY(dataId) REFERENCES data(id) ON DELETE CASCADE
     );", NO_PARAMS)?;
 
-    conn.execute("CREATE INDEX IF NOT EXISTS song_data_songId ON song_data (songId);", NO_PARAMS)?;
+    //conn.execute("CREATE INDEX IF NOT EXISTS song_data_songId ON song_data (songId);", NO_PARAMS)?;
 
     let mut stmt = conn.prepare("SELECT id, value FROM datatype;")?;
     let rows: Rows = stmt.query(NO_PARAMS)?;

@@ -24,3 +24,25 @@ fn main() -> Result<(), ()> {
 
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::{Duration, Instant};
+
+    #[test]
+    fn big_dir_time_test() {
+        let db_file = "./test.db";
+        let conn = db::create_connection(db_file).unwrap();
+        //let big_dir = "F:/Music";
+        let big_dir = "D:/Dropbox/Music/Artists";
+
+        let start = Instant::now();
+        sweep::sweep(&conn, big_dir).unwrap();
+        let duration = start.elapsed().as_secs();
+
+        println!("Time elapsed in seconds: {}", duration);
+        println!("Time elapsed in minutes: {}", duration / 60);
+        assert_eq!(2,1);
+    }
+}

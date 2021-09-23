@@ -83,6 +83,17 @@ const actions = {
             }
         })
         commit('updateSetting', res);
+    },
+    async checkDirectory({}, dir) {
+        let res = await client.mutate({
+            mutation: gql`mutation ($dir: String) {
+                checkDirectory(dir: $dir)
+            }`,
+            variables: {
+                dir
+            }
+        })
+        return res.data.checkDirectory;
     }
 }
 

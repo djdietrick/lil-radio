@@ -37,12 +37,16 @@ export const addDirectoryData = (ctx, dir) => {
             addWatcher(dir);
             let name = 'MUSIC_DIRS';
             let setting = await getSetting(ctx, name);
+            console.log(setting);
             if(setting) {
-                let newVal = setting.value + setting.value > 0 ? ';' : '' + dir;
+                //let newVal = setting.value + setting.value.length > 0 ? ';' : '' + dir;
+                let newVal = setting.value.concat(setting.value.length > 0 ? ';' : '', dir);
+                console.log('Updating setting to ' + newVal);
                 await ctx.db.run(`UPDATE settings SET value='${newVal}' WHERE name='${name}'`);
                 resolve({name, value: newVal})
             } else {
-                ctx.db.run(`INSERT INTO settings (name, value) VALUES ('MUSIC_DIRS', ${dir}`);
+                console.log('Did not find setting, inserting');
+                ctx.db.run(`INSERT INTO settings (name, value) VALUES (${name}, ${dir}`);
                 resolve({name, value: dir})
             }
         } catch(e) {
@@ -82,6 +86,10 @@ export const removeDirectoryData = (ctx, dir) => {
                 artistIds.add(song.artistId);
                 albumIds.add(song.albumId);
             }
+
+            await ctx.db.run(`DELETE FROM song_data WHERE dataId IN (${data})`);
+            await ctx.db.run(`DELETE FROM data WHERE id IN (${data})`);
+
             await ctx.db.run(`DELETE FROM song WHERE id IN (${songIdsStr})`)
             console.log(`Deleted ${songData.length} song(s)`)
             

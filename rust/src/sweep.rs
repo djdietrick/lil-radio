@@ -78,3 +78,17 @@ fn update_dir(db: &Connection, path: String, dir_sizes: &HashMap<String, u64>) -
 fn create_song_data(db: &Connection, song_id: i64, data_id: i64) {
     db.execute("INSERT INTO song_data (songId, dataId) VALUES (?1, ?2)", params![song_id, data_id]).unwrap();
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn find_size_test() {
+        let mut dir_sizes: HashMap<String, u64> = HashMap::new();
+        let dir: &str = "D:/Dropbox/Music/Artists";
+        find_size_rec(String::from(dir), &mut dir_sizes, dir).unwrap();
+        print!("{:#?}", dir_sizes);
+    }
+    
+}

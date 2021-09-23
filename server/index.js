@@ -9,6 +9,7 @@ import {getPathFromSongId} from './controllers/data';
 import chokidar from 'chokidar';
 import {sweepDir} from './utils/sweep'
 import { format } from 'url';
+import {createSettingsWindow} from '../src-electron/main-process/electron-main';
 
 const isDev = process.env.NODE_ENV === 'developement';
 
@@ -64,6 +65,7 @@ class Server {
                 } else {
                     // Empty sweep will just create db
                     sweepDir(musicDirs);
+                    createSettingsWindow();
                 }
                 
             } catch(e) {
